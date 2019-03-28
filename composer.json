@@ -1,0 +1,36 @@
+{
+  "name": "asioso/pimcore-payone-module",
+  "type": "pimcore-bundle",
+  "license": "GPL-3.0-or-later",
+  "description": "A bundle to help with e-commerce and payone",
+  "keywords": [
+    "pimcore",
+    "pimcore-plugin",
+    "payone",
+    "e-commerce"
+  ],
+  "homepage": "https://www.asioso.com",
+  "authors": [
+    {
+      "name": "Fabian Pechstein",
+      "email": "fabian.pechstein@asioso.com",
+      "homepage": "https://www.asioso.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "guzzlehttp/guzzle": "~6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "PayoneBundle\\": "src/PayoneBundle"
+    }
+  },
+  "extra": {
+    "pimcore": {
+      "bundles": [
+        "PayoneBundle\\PayoneBundle"
+      ]
+    }
+  }
+}

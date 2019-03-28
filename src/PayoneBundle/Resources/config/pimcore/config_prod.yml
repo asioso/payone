@@ -1,0 +1,62 @@
+
+monolog:
+    channels : [ 'payment']
+    handlers:
+        main:
+            type:         fingers_crossed
+            action_level: debug
+            handler:      grouped
+            channels: ['!payment']
+
+        grouped:
+            type:    group
+            members: [streamed, deduplicated]
+
+        streamed:
+            type:  rotating_file
+            path:  '%kernel.logs_dir%/%kernel.environment%.log'
+            level: debug
+            max_files: 10
+
+        deduplicated:
+            type:    deduplication
+            handler: swift
+
+        swift:
+            type:       swift_mailer
+            from_email: 'info@neyer.de'
+            to_email:   [ 'fabian.pechstein@asioso.com']
+            subject:    'An Error Occurred! %%message%%'
+            level:      error
+            formatter:  monolog.formatter.html
+            content_type: text/html
+
+
+        payment:
+            type:         fingers_crossed
+            action_level: debug
+            handler:      payment_grouped
+            channels: ['payment']
+
+        payment_grouped:
+            type:    group
+            members: [payment_streamed, payment_deduplicated]
+
+        payment_streamed:
+            type:  rotating_file
+            path:  '%kernel.logs_dir%/%kernel.environment%_payment.log'
+            level: debug
+            max_files: 10
+
+        payment_deduplicated:
+            type:    deduplication
+            handler: payment_swift
+
+        payment_swift:
+            type:       swift_mailer
+            from_email: 'info@neyer.de'
+            to_email:   [ 'fabian.pechstein@asioso.com']
+            subject:    'A Payment Error Occurred! %%message%%'
+            level:      error
+            formatter:  monolog.formatter.html
+            content_type: text/html

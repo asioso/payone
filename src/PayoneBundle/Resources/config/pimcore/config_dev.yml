@@ -1,0 +1,34 @@
+monolog:
+    channels : [ 'payment']
+    handlers:
+        main:
+            type:         fingers_crossed
+            action_level: debug
+            handler:      grouped
+            channels: ['!payment']
+
+        grouped:
+            type:    group
+            members: [streamed]
+
+        streamed:
+            type:  rotating_file
+            path:  '%kernel.logs_dir%/%kernel.environment%.log'
+            level: debug
+            max_files: 10
+
+        payment:
+            type:         fingers_crossed
+            action_level: debug
+            handler:      payment_grouped
+            channels: ['payment']
+
+        payment_grouped:
+            type:    group
+            members: [payment_streamed]
+
+        payment_streamed:
+            type:  rotating_file
+            path:  '%kernel.logs_dir%/%kernel.environment%_payment.log'
+            level: debug
+            max_files: 10
