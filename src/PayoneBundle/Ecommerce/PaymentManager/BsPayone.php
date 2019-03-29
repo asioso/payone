@@ -46,6 +46,8 @@ use Symfony\Component\Intl\Exception\NotImplementedException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Templating\EngineInterface;
 use PayoneBundle\Ecommerce\PaymentManager\Helper\Payone;
+use PayoneBundle\Ecommerce\IDataProcessor;
+use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\AbstractCart;
 
 /**
  * Class BsPayone
@@ -191,6 +193,12 @@ class BsPayone implements IPayment
      */
     private $registry;
 
+    /**
+     * @var $processor IDataProcessor
+     */
+    private $processor;
+
+
 
     /**
      * BsPayone constructor.
@@ -265,6 +273,17 @@ class BsPayone implements IPayment
             $this->paymentMethods = $options['payment_methods'];
         }
 
+        if (isset($options['data_processor'])) {
+            $class = $options['data_processor'];
+
+            $instance  = new $class();
+            if(!$instance instanceof IDataProcessor ){
+                throw new \Exception(sprintf('your DataProcessor must implement interface %s', IDataProcessor::class ));
+            }
+
+            $this->processor = $instance;
+        }
+
     }
 
     /**
@@ -317,6 +336,9 @@ class BsPayone implements IPayment
             ->setDefined('payment_methods')
             ->setAllowedTypes('payment_methods', 'array');
 
+        $resolver
+            ->setDefined('data_processor')
+            ->setAllowedTypes('data_processor', 'string');
 
         $notEmptyValidator = function ($value) {
             return !empty($value);
@@ -375,73 +397,32 @@ class BsPayone implements IPayment
 
     /**
      * @param AbstractPaymentInformation $information
+     * @param AbstractCart $cart
      * @param string $lang
      * @return array
      */
-    public function getShippingConfig(AbstractPaymentInformation &$information, $lang = "de")
+    public function getShippingConfig(AbstractPaymentInformation &$information, AbstractCart &$cart, $lang = "de")
     {
 
-        $object = $information->getObject();
-        $data = array(
-            "shipping_firstname" => $object->get('deliveryFirstname'),
-            "shipping_lastname" => $object->get('deliveryLastname'),
-            "shipping_street" => $object->get('deliveryStreet'),
-            "shipping_zip" => $object->get('deliveryZip'),
-            "shipping_city" => $object->get('deliveryCity'),
-            "shipping_country" => $object->get('deliveryCountry'),
-        );
-        if ($object->get('deliveryCompany') != null) {
-            $data["shipping_company"] = $object->get('deliveryCompany');
-        }
+        $data =  $this->processor->retrieveShippingData($information, $cart);
 
         return $data;
     }
 
     /**
-     * @param CheckoutManager $checkoutManager
+     * @param AbstractPaymentInformation $information
+     * @param AbstractCart $cart
      * @param string $lang
      * @return array
      */
-    public function getPersonalConfig(CheckoutManager $checkoutManager, $lang = "de")
+    public function getPersonalConfig(AbstractPaymentInformation &$information, AbstractCart &$cart, $lang = "de")
     {
 
-        $deliveryData = $checkoutManager->getCheckoutStep('deliveryaddress')->getData();
-
-
-        $data = array(
-            #"salutation" => "Mr.",
-            "firstname" => $deliveryData->addressFirstname,
-            "lastname" => $deliveryData->addressLastname,
-            "street" => $deliveryData->addressStreet,
-            "zip" => $deliveryData->addressZip,
-            "city" => $deliveryData->addressCity,
-            "country" => $deliveryData->addressCountryCode,
-            "email" => $deliveryData->addressEmail,
-            "language" => $lang,
-        );
-
-        if ($deliveryData->addressCompany) {
-            $data['company'] = $deliveryData->addressCompany;
-        }
-
-        if ($deliveryData->checkDelivery == true) {
-            $data = array(
-                "firstname" => $deliveryData->billingFirstname,
-                "lastname" => $deliveryData->billingLastname,
-                "street" => $deliveryData->billingStreet,
-                "zip" => $deliveryData->billingZip,
-                "city" => $deliveryData->billingCity,
-                "country" => $deliveryData->billingCountryCode,
-                "email" => $deliveryData->billingEmail,
-                "language" => $lang,
-            );
-
-            if ($deliveryData->billingCompany) {
-                $data['company'] = $deliveryData->billingCompany;
-            }
-        }
+        $data =  $this->processor->retrievePersonalData($information, $cart);
+        $data['language'] = $lang;
 
         return $data;
+
     }
 
 
@@ -533,7 +514,7 @@ class BsPayone implements IPayment
         }
 
         $minConfig = $this->getMinimalDefaultParameters(self::METHOD_SEPA);
-        $personalConfig = $this->getPersonalConfig($checkoutManager = Factory::getInstance()->getCheckoutManager($cart));
+        $personalConfig = $this->getPersonalConfig($config['paymentInfo'], $cart);
         $invoiceData = $this->getInvoiceData($cart);
 
         $personalConfig = array_merge($personalConfig, $invoiceData);
@@ -684,19 +665,17 @@ class BsPayone implements IPayment
 
         $parameters = array();
         $minConfig = $this->getMinimalDefaultParameters($paymentType);
-        $personalConfig = $this->getPersonalConfig($checkoutManager = Factory::getInstance()->getCheckoutManager($cart));
+        $personalConfig = $this->getPersonalConfig($config['paymentInfo'], $cart);
+        $shippingData = $this->getShippingConfig($config['paymentInfo'], $cart);
+        $personalConfig = array_merge($personalConfig, $shippingData);
+        $invoiceData = $this->getInvoiceData($cart);
+        $personalConfig = array_merge($personalConfig, $invoiceData);
 
         switch ($paymentType) {
 
             case self::METHOD_GIROPAY:
 
                 $personalConfig['birthday'] = $config['birthday'];
-                $shippingData = $this->getShippingConfig($config['paymentInfo']);
-                $personalConfig = array_merge($personalConfig, $shippingData);
-                $invoiceData = $this->getInvoiceData($cart);
-
-                $personalConfig = array_merge($personalConfig, $invoiceData);
-
 
                 $parameters = array(
                     "request" => "authorization",
@@ -718,11 +697,6 @@ class BsPayone implements IPayment
 
             // get details!
             case self::METHOD_INVOICE:
-                $shippingData = $this->getShippingConfig($config['paymentInfo']);
-                $personalConfig = array_merge($personalConfig, $shippingData);
-                $invoiceData = $this->getInvoiceData($cart);
-
-                $personalConfig = array_merge($personalConfig, $invoiceData);
 
                 $method = self::METHOD_INVOICE;
                 $parameters = array(
@@ -740,12 +714,6 @@ class BsPayone implements IPayment
                 break;
 
             case self::METHOD_SEPA:
-
-                $shippingData = $this->getShippingConfig($config['paymentInfo']);
-                $personalConfig = array_merge($personalConfig, $shippingData);
-                $invoiceData = $this->getInvoiceData($cart);
-
-                $personalConfig = array_merge($personalConfig, $invoiceData);
 
                 $parameters = array(
                     "clearingtype" => "elv", // rec for invoice
@@ -766,12 +734,6 @@ class BsPayone implements IPayment
 
             case self::METHOD_CCARD:
 
-                $shippingData = $this->getShippingConfig($config['paymentInfo']);
-                $personalConfig = array_merge($personalConfig, $shippingData);
-                $invoiceData = $this->getInvoiceData($cart);
-
-                $personalConfig = array_merge($personalConfig, $invoiceData);
-
                 $pseudocardpan = $config['pseudocardpan'];
 
                 $parameters = array(
@@ -791,11 +753,6 @@ class BsPayone implements IPayment
 
             case self::METHOD_PAYDIRECT:
 
-                $shippingData = $this->getShippingConfig($config['paymentInfo']);
-                $personalConfig = array_merge($personalConfig, $shippingData);
-                $invoiceData = $this->getInvoiceData($cart);
-
-                $personalConfig = array_merge($personalConfig, $invoiceData);
 
                 $method = self::METHOD_PAYDIRECT;
                 $parameters = array(
@@ -820,12 +777,6 @@ class BsPayone implements IPayment
                 break;
 
             case self::METHOD_PAYPAL:
-                $method = self::METHOD_PAYPAL;
-                $shippingData = $this->getShippingConfig($config['paymentInfo']);
-                $personalConfig = array_merge($personalConfig, $shippingData);
-                $invoiceData = $this->getInvoiceData($cart);
-
-                $personalConfig = array_merge($personalConfig, $invoiceData);
 
 
                 $parameters = array(
@@ -844,23 +795,19 @@ class BsPayone implements IPayment
                 break;
 
             case self::METHOD_SOFORT:
+
                 $klarnaName = $personalConfig['firstname'] . ' ' . $personalConfig['lastname'];
                 if (strlen($klarnaName) <= 27) {
                     $personalConfig['lastname'] = $klarnaName;
                     unset($personalConfig['firstname']);
                 }
-                $shippingData = $this->getShippingConfig($config['paymentInfo']);
-                $personalConfig = array_merge($personalConfig, $shippingData);
-                $invoiceData = $this->getInvoiceData($cart);
 
-                $personalConfig = array_merge($personalConfig, $invoiceData);
 
                 $method = self::METHOD_SOFORT;
                 $parameters = array(
                     "request" => "authorization",
                     "clearingtype" => "sb",             // sb for Online Bank Transfer
                     "onlinebanktransfertype" => "PNT",  // PNT for Sofort
-                    "bankcountry" => "DE", //TODO
                     //"bankaccount" => "12345678",
                     //"bankcountry" => $config['bankcountry'],
                     //"bankcode" => "88888888",

@@ -11,6 +11,7 @@ payment_manager:
       profile: sandbox
       profiles:
         _defaults:
+          data_processor: \AppBundle\Ecommerce\DataProcessor
           hash_algorithm: md5
           #paypal_activate_item_level: true
           partial: PayoneBundle:BsPayone:method_selection_seamless.html.php
@@ -48,7 +49,7 @@ payment_manager:
               mid: <mid_other-sandbox>
               portalid: <other-portal-id>
               key: <other-key>
-              mode: '%env(PAYONE_MODE)%' # example use env file to set your configuration see- /examples/payment.env
+              # example use env file to set your configuration see- /examples/payment.env
 
 
 
