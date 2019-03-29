@@ -49,7 +49,7 @@ payment_manager:
               mid: <mid_other-sandbox>
               portalid: <other-portal-id>
               key: <other-key>
-              # example use env file to set your configuration see- /examples/payment.env
+              mode: '%env(PAYONE_MODE)%' # example use env file to set your configuration see- /examples/payment.env
 
 
 
