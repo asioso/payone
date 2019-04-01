@@ -11,7 +11,7 @@ in your composer.json file add the following repo under your
 "repositories": [
     {
       "type": "vcs",
-      "url":  "git@bitbucket.org:asioso/pimcore-payone-module.git"
+      "url":  "git@bitbucket.org:asioso/payone.git"
     }
   ],
 ``` 
@@ -119,4 +119,4 @@ providers:
 
 ###DataProcessor
 We need some information from earlier checkout steps, so your implementation of this class will be used to fill in personal Data and shipping data.
-Take a look at [this example]((https://bitbucket.org/asioso/pimcore-payone-module/src/master/examples/DataProcessor/DataProcessor.php))
+Take a look at [this example]((https://bitbucket.org/asioso/payone/src/master/examples/DataProcessor/DataProcessor.php))
