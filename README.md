@@ -22,13 +22,13 @@ test if composer can find the package.
 composer search asioso
 
 >>>>>
-asioso/pimcore-payone-module A bundle to help with payone  
+asioso/payone A bundle to help with payone  
 
 ```
 
 add the bundle to composer.json with
 ```
-composer require asioso/pimcore-payone-module:dev-master
+composer require asioso/payone:dev-master
 
 ```
 
@@ -119,4 +119,4 @@ providers:
 
 ###DataProcessor
 We need some information from earlier checkout steps, so your implementation of this class will be used to fill in personal Data and shipping data.
-Take a look at [this example]((https://bitbucket.org/asioso/payone/src/master/examples/DataProcessor/DataProcessor.php))
+Take a look at [this example](https://bitbucket.org/asioso/payone/src/master/examples/DataProcessor/DataProcessor.php)
