@@ -1023,16 +1023,12 @@ class BsPayone extends AbstractPayment
     {
         if ($this->paymentInformation) {
 
-            if (($object = $this->paymentInformation->object) instanceof OnlineShopOrder) {
+            /*
+             * as an example disable some method because of cart content!
+             */
 
-                /*
-                 * as an example disable some method because of cart content!
-                 */
+            //unset($paymentMethods[self::METHOD_SOFORT]);
 
-                //unset($paymentMethods[self::METHOD_SOFORT]);
-
-
-            }
         }
 
         return $paymentMethods;
