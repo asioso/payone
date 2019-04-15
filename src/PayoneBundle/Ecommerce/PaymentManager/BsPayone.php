@@ -11,10 +11,6 @@
 namespace PayoneBundle\Ecommerce\PaymentManager;
 
 
-use AppBundle\Ecommerce\OrderMail\IOrderMailer;
-use AppBundle\Ecommerce\OrderMail\OrderMailer;
-use AppBundle\Model\Customer;
-use AppBundle\Model\DefaultProduct;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Stream;
 use PayoneBundle\Registry\IRegistry;
@@ -181,10 +177,7 @@ class BsPayone extends AbstractPayment
      * @var
      */
     private $language;
-    /**
-     * @var IOrderMailer
-     */
-    private $mailer;
+
 
     /**
      * @var LoggerInterface
@@ -213,10 +206,9 @@ class BsPayone extends AbstractPayment
      * @param EngineInterface $templatingEngine
      * @param SessionInterface $session
      * @param FormFactoryInterface $formFactory
-     * @param IOrderMailer $mailer
      * @param LoggerInterface $logger
      */
-    public function __construct(array $options, EngineInterface $templatingEngine, SessionInterface $session, FormFactoryInterface $formFactory, IOrderMailer $mailer, LoggerInterface $logger, IRegistry $registry)
+    public function __construct(array $options, EngineInterface $templatingEngine, SessionInterface $session, FormFactoryInterface $formFactory, LoggerInterface $logger, IRegistry $registry)
     {
         $this->formFactory = $formFactory;
 
@@ -225,7 +217,6 @@ class BsPayone extends AbstractPayment
         );
         $this->templatingEngine = $templatingEngine;
         $this->session = $session;
-        $this->mailer = $mailer;
         $this->mode = getenv('PAYONE_MODE');
 
         $this->logger = $logger;
