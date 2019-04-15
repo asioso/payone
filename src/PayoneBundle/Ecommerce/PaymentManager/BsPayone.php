@@ -24,16 +24,18 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CheckoutManager\CheckoutManager;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Exception\InvalidConfigException;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
+use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractOrder;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractPaymentInformation;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\Currency;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\IStatus;
-use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Payment\IPayment;
+use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Payment\AbstractPayment;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Status;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\IPrice;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\Price;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Type\Decimal;
 use Pimcore\FeatureToggles\Features\DebugMode;
 use Pimcore\Logger;
+use Pimcore\Model\DataObject\Listing\Concrete;
 use Pimcore\Model\DataObject\OnlineShopOrder;
 use Pimcore\Model\DataObject\Product;
 use Pimcore\Tool;
@@ -53,7 +55,7 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\AbstractCart;
  * Class BsPayone
  * @package PayoneBundle\Ecommerce\PaymentManager
  */
-class BsPayone implements IPayment
+class BsPayone extends AbstractPayment
 {
 
 
@@ -197,6 +199,11 @@ class BsPayone implements IPayment
      * @var $processor IDataProcessor
      */
     private $processor;
+
+    /**
+     * @var bool
+     */
+    protected $recurringPaymentEnabled = false;
 
 
 
@@ -1082,6 +1089,8 @@ class BsPayone implements IPayment
 
         return $response;
     }
+
+
 
     /**
      * @param $fields
