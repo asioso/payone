@@ -19,6 +19,7 @@ use Pimcore\Model\DataObject\Objectbrick;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Pimcore\Db\ConnectionInterface;
+use Pimcore\Migrations\MigrationManager;
 
 /**
  * Class Installer
