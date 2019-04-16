@@ -36,5 +36,13 @@ interface IDataProcessor
      */
     public function retrieveShippingData(AbstractPaymentInformation &$information, AbstractCart &$cart);
 
+    /**
+     * return an array ['id'=> <itemId>, 'name'=><itemName>]
+     *  is used to generate invoice data
+     * @param $cartItem
+     * @return array
+     */
+    public function retrieveInvoiceData($cartItem);
+
 
 }

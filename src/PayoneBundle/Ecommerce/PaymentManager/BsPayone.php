@@ -15,12 +15,8 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Stream;
 use PayoneBundle\Registry\IRegistry;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\Cart;
-use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\CartItem;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICart;
-use Pimcore\Bundle\EcommerceFrameworkBundle\CheckoutManager\CheckoutManager;
-use Pimcore\Bundle\EcommerceFrameworkBundle\Exception\InvalidConfigException;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
-use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractOrder;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractPaymentInformation;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\Currency;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\IStatus;
@@ -31,9 +27,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\Price;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Type\Decimal;
 use Pimcore\FeatureToggles\Features\DebugMode;
 use Pimcore\Logger;
-use Pimcore\Model\DataObject\Listing\Concrete;
-use Pimcore\Model\DataObject\OnlineShopOrder;
-use Pimcore\Model\DataObject\Product;
 use Pimcore\Tool;
 use Pimcore\Tool\RestClient\Exception;
 use Psr\Http\Message\StreamInterface;
@@ -1178,11 +1171,14 @@ class BsPayone extends AbstractPayment
 
         $c = 1; //starts at 1!!!!
         foreach ($cart->getItems() as $cartItem) {
-            $cartData["id[$c]"] = $cartItem->getProduct()->getSku();
+            $tmpData= $this->processor->retrieveInvoiceData($cartItem);
+
+            $cartData["id[$c]"] = $tmpData['id'];
             //needs to be in cents
             $cartData["pr[$c]"] = (string)(Decimal::create($cartItem->getPrice()->getGrossAmount())->mul(100)->withScale(0)->asNumeric());
             $cartData["no[$c]"] = (string)$cartItem->getCount();
-            $cartData["de[$c]"] = $cartItem->getProduct()->getName();
+            $cartData["de[$c]"] = $tmpData['name'];
+
             if (!empty($cartItem->getPrice()->getTaxEntries())) {
                 $cartData["va[$c]"] = number_format($cartItem->getPrice()->getTaxEntries()[0]->getPercent(), 0, '.', '');
             }
