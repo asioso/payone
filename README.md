@@ -18,6 +18,7 @@ in your composer.json file add the following repo under your
 
 after that make sure you have access to the repo and added your ssh key to your bitbucket account.
 test if composer can find the package.
+
 ```
 composer search asioso
 
@@ -27,6 +28,7 @@ asioso/payone A bundle to help with payone
 ```
 
 add the bundle to composer.json with
+
 ```
 composer require asioso/payone:dev-master
 
@@ -44,6 +46,7 @@ otherwise same old same old - this will create a new database Table and import a
 
 ##Configuration
 add payone as payment provider in your e-commerce configuration. Use payone as payment provider in your checkout manager: 
+
 ```
             default:
                 payment:
@@ -51,6 +54,7 @@ add payone as payment provider in your e-commerce configuration. Use payone as p
 ```
 
 see an example below:
+
 ```
 # Configuration of payment providers, key is name of provider
 providers:

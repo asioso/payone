@@ -121,7 +121,7 @@ class Installer extends MigrationInstaller
                 $brick->setKey($key);
             }
             $data = file_get_contents($path);
-            $success = Service::importObjectBrickFromJson($brick, $data);
+            $success = \Pimcore\Model\DataObject\ClassDefinition\Service::importObjectBrickFromJson($brick, $data);
             if (!$success) {
                 throw new AbortMigrationException(sprintf(
                     'Failed to create object brick "%s"',
