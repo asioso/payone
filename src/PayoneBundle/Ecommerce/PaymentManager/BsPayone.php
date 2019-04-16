@@ -13,6 +13,7 @@ namespace PayoneBundle\Ecommerce\PaymentManager;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Stream;
+use PayoneBundle\PayoneBundle;
 use PayoneBundle\Registry\IRegistry;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\Cart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICart;
@@ -29,6 +30,7 @@ use Pimcore\FeatureToggles\Features\DebugMode;
 use Pimcore\Logger;
 use Pimcore\Tool;
 use Pimcore\Tool\RestClient\Exception;
+use Pimcore\Version;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -382,6 +384,14 @@ class BsPayone extends AbstractPayment
                 $paymentData['encoding'] = $this->paymentMethods[$method]['encoding'];
             }
         }
+
+
+
+        $paymentData['integrator_name'] = "pimcore";
+        $paymentData['integrator_version'] = Version::getVersion();
+        $paymentData['solution_name'] = "Asioso";
+        $paymentData['solution_version'] = PayoneBundle::getSolutionVersion();
+
 
         return $paymentData;
     }
