@@ -578,9 +578,10 @@ class BsPayone extends AbstractPayment
         $availableMethods = $this->getAvailablePaymentOption($this->paymentMethods, $cart);
 
         //check if paymentType is available for this order!
-        if (!array_key_exists($paymentType, $availableMethods)) {
-            return array('status' => 'ERROR');
-        }
+        //if (!array_key_exists($paymentType, $availableMethods)) {
+        //    return array('status' => 'ERROR');
+        //}
+
         //setup post fields
         $postFields = $this->setupPostParametersFor($paymentType, $cart, $orderIdent, $config);
 
