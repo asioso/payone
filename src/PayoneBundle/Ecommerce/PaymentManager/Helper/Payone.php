@@ -22,9 +22,20 @@
  * @author Florian Bender <florian.bender@bspayone.com>
  * @author Timo Kuchel <timo.kuchel@bspayone.com>
  * @author Hannes Reinberger <hannes.reinberger@bspayone.com>
+ *
+ *
+ * changes for pimcore integration:
+ * @author  Fabian Pechstein <fabian.pechstein@asioso.com>
  */
 
 namespace PayoneBundle\Ecommerce\PaymentManager\Helper;
+
+use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Payone
@@ -43,54 +54,49 @@ class Payone
      *
      * @param array $request
      * @param string $responsetype
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Exception
-     * @return array|\Psr\Http\Message\StreamInterface Returns an array of response
+     * @param LoggerInterface|null $logger
+     * @return array|StreamInterface Returns an array of response
      *     parameters in "classic" mode, a Stream for any other mode.
+     * @throws GuzzleException
+     * @throws Exception
      */
-    public static function sendRequest($request, $responsetype = "")
+    public static function sendRequest($request, $responsetype = "", LoggerInterface $logger = null)
     {
         if ($responsetype === "json") {
             // appends the accept: application/json header to the request
             // This is used to retrieve structured JSON in the response
-            $client = new \GuzzleHttp\Client(['headers' => ['accept' => 'application/json']]);
+            $client = new Client(['headers' => ['accept' => 'application/json']]);
         } else {
             // if $responsetype is set to anything else than "json", use the standard request
-            $client = new \GuzzleHttp\Client();
+            $client = new Client();
         }
 
         $begin = microtime(true);
 
         if ($response = $client->request('POST', self::PAYONE_SERVER_API_URL, ['form_params' => $request])) {
 
-           # if (implode($response->getHeader('Content-Type')) == 'text/plain; charset=UTF-8') {
-                // if the content type is text/plain, parse response into array
-                $return = self::parseResponse($response);
-           # } else {
-                // if the content type is anything else, just return the response body
-            #    $return = $response->getBody();
-           # }
+            $return = self::parseResponse($response, $logger);
 
         } else {
-            throw new \Exception('Something went wrong during the HTTP request.');
+            throw new Exception('Something went wrong during the HTTP request.');
         }
 
         $end = microtime(true);
         $duration = $end - $begin;
         $return['duration'] = $duration;
-        #echo "done.\n";
-        #echo "Request took " . $duration . " seconds.\n";
+
         return $return;
     }
 
     /**
      * gets response string an puts it into an array
      *
-     * @param \Psr\Http\Message\ResponseInterface $response
-     * @throws \Exception
+     * @param ResponseInterface $response
+     * @param LoggerInterface|null $logger
      * @return array
+     * @throws Exception
      */
-    public static function parseResponse(\Psr\Http\Message\ResponseInterface $response)
+    public static function parseResponse(ResponseInterface $response, LoggerInterface $logger = null)
     {
         $responseArray = array();
         $explode = explode("\n", $response->getBody());
@@ -107,10 +113,15 @@ class Payone
                 }
             }
         }
+
+
+        if ($logger) {
+            $logger->info("server response: ".var_export($responseArray, true));
+        }
+
         if ($responseArray['status'] == "ERROR") {
-            $msg = "Payone returned an error:\n" . print_r($responseArray, true);
-            //throw new \Exception($msg);
-            throw new \Exception($responseArray['customermessage']);
+
+            throw new Exception($responseArray['customermessage']);
         }
         return $responseArray;
     }

@@ -436,9 +436,9 @@ class BsPayone extends AbstractPayment
     private function getBusinessRelations(array $personalConfig) : array
     {
         if(isset($personalConfig['company']) && !empty($personalConfig['company'])){
-            $personalConfig['businessrelation'] = "B2B";
+            $personalConfig['businessrelation'] = "b2b";
         }else{
-            $personalConfig['businessrelation'] = "B2C";
+            $personalConfig['businessrelation'] = "b2c";
         }
 
         return $personalConfig;
@@ -661,8 +661,8 @@ class BsPayone extends AbstractPayment
      * @param $cart
      * @param $orderIdent
      * @param $config
-     * @throws \Pimcore\Bundle\EcommerceFrameworkBundle\Exception\UnsupportedException
      * @return array
+     * @throws \Exception
      */
     private function setupPostParametersFor($paymentType, $cart, $orderIdent, $config)
     {
@@ -1090,10 +1090,10 @@ class BsPayone extends AbstractPayment
          *  [userid] => 90737467
          * )
          */
-        $response = Payone::sendRequest($params);
+        $response = Payone::sendRequest($params,"", $this->logger);
         //todo handle streamInterface?
         if ($response instanceof Stream) {
-            $response = Payone::parseResponse((string)$response->getContents()); // returns all the contents
+            $response = Payone::parseResponse((string)$response->getContents(), $this->logger); // returns all the contents
         }
 
 
