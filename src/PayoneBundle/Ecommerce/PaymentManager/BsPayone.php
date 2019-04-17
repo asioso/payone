@@ -424,7 +424,6 @@ class BsPayone extends AbstractPayment
         $data =  $this->processor->retrievePersonalData($information, $cart);
         $data['language'] = $lang;
 
-        $data = $this->getBusinessRelations($data);
 
         return $data;
 
@@ -719,7 +718,7 @@ class BsPayone extends AbstractPayment
 
             // get details!
             case self::METHOD_INVOICE:
-
+                $personalConfig =  $this->getBusinessRelations($personalConfig);
                 $method = self::METHOD_INVOICE;
                 $parameters = array(
                     "clearingtype" => "rec", // rec for invoice
