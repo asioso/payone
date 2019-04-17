@@ -194,7 +194,6 @@ class BsPayone extends AbstractPayment
     protected $recurringPaymentEnabled = false;
 
 
-
     /**
      * BsPayone constructor.
      * @param array $options
@@ -202,6 +201,8 @@ class BsPayone extends AbstractPayment
      * @param SessionInterface $session
      * @param FormFactoryInterface $formFactory
      * @param LoggerInterface $logger
+     * @param IRegistry $registry
+     * @throws \Exception
      */
     public function __construct(array $options, EngineInterface $templatingEngine, SessionInterface $session, FormFactoryInterface $formFactory, LoggerInterface $logger, IRegistry $registry)
     {
@@ -220,6 +221,7 @@ class BsPayone extends AbstractPayment
 
     /**
      * @param array $options
+     * @throws \Exception
      */
     protected function processOptions(array $options)
     {
@@ -422,7 +424,25 @@ class BsPayone extends AbstractPayment
         $data =  $this->processor->retrievePersonalData($information, $cart);
         $data['language'] = $lang;
 
+        $data = $this->getBusinessRelations($data);
+
         return $data;
+
+    }
+
+    /**
+     * @param array $personalConfig
+     * @return array
+     */
+    private function getBusinessRelations(array $personalConfig) : array
+    {
+        if(isset($personalConfig['company']) && !empty($personalConfig['company'])){
+            $personalConfig['businessrelation'] = "B2B";
+        }else{
+            $personalConfig['businessrelation'] = "B2C";
+        }
+
+        return $personalConfig;
 
     }
 
