@@ -41,11 +41,11 @@ class PayoneBundle extends AbstractPimcoreBundle implements \Pimcore\Extension\B
 
     public function getVersion()
     {
-        return 'v0.1';
+        return 'v0.2';
     }
 
     public static function getSolutionVersion(){
-        return "v0.1";
+        return "v0.2";
     }
 
 }
