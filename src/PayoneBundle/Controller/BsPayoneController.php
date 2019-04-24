@@ -82,6 +82,7 @@ class BsPayoneController extends AbstractCartAware
 
             $cart = $this->getCart();
             $checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
+            $paymentInformation = $checkoutManager->startOrderPayment();
 
             /**
              * @var $payment BsPayone
@@ -91,6 +92,7 @@ class BsPayoneController extends AbstractCartAware
                 'iban' => $iban,
                 'bic' => $bic,
                 'cart' => $cart,
+                'paymentInfo' => $paymentInformation,
             );
 
             $response = $payment->getSepaManadateStatus($config);
