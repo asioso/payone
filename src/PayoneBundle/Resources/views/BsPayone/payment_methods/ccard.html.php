@@ -140,32 +140,32 @@
 
                 </div>
                 <!-- configure your cardtype-selection here -->
-                <label for="cardtypeInput"><?= $this->translate('payment.payone-seamless.pay.card-type') ?>:</label>
-                <select id="cardtype">
+                <label for="cardtypeInput"  style="width: 100px; height: 30px; line-height: 30px;" ><?= $this->translate('payment.payone-seamless.pay.card-type') ?>:</label>
+                <select id="cardtype" style="border: 1px solid rgb(0, 0, 0);" >
                     <option value="V">VISA</option>
                     <option value="M">Mastercard</option>
                 </select>
-                <div>
-                    <label for="cardpanInput"><?= $this->translate('payment.payone-seamless.pay.cardpan') ?>:</label>
-                    <span class="inputIframe" id="cardpan"><div name="cardpan"></div></span>
+                <div style="height: 30px; overflow: hidden;" >
+                    <label for="cardpanInput" style="width: 100px; height: 30px; line-height: 30px; vertical-align: top; margin-top: -2px;"><?= $this->translate('payment.payone-seamless.pay.cardpan') ?>:</label>
+                    <span class="inputIframe" id="cardpan" style="display: inline-block; width: 200px;" ><div name="cardpan"></div></span>
                 </div>
-                <div name="cvc">
-                    <label for="cvcInput"><?= $this->translate('payment.payone-seamless.pay.now.cvc') ?>:</label>
-                    <span class="inputIframe" id="cvc2"></span>
+                <div name="cvc" style="height: 30px; overflow: hidden;" >
+                    <label for="cvcInput" style="width: 100px; height: 30px; line-height: 30px; vertical-align: top; margin-top: -2px;" ><?= $this->translate('payment.payone-seamless.pay.now.cvc') ?>:</label>
+                    <span class="inputIframe" id="cvc2" style="width: 200px;" ></span>
                 </div>
 
-                <div name="expired">
-                    <label for="expireInput"><?= $this->translate('payment.payone-seamless.pay.expiration-date') ?>:</label>
-                    <span id="expireInput" class="inputIframe">
+                <div name="expired" style="height: 30px; overflow: hidden;" >
+                    <label for="expireInput" style="width: 100px; height: 30px; line-height: 30px; vertical-align: top; margin-top: -2px;" ><?= $this->translate('payment.payone-seamless.pay.expiration-date') ?>:</label>
+                    <span id="expireInput" class="inputIframe" style="width: 200px;" >
                 <span id="cardexpiremonth"></span>
                 <span id="cardexpireyear"></span>
             </span>
                 </div>
                 <div name="name">
-                    <label for="firstname"><?= $this->translate('payment.payone-seamless.firstname') ?>:</label>
-                    <input id="firstname" type="text" name="firstname" value="">
-                    <label for="lastname"><?= $this->translate('payment.payone-seamless.pay.lastname') ?>:</label>
-                    <input id="lastname" type="text" name="lastname" value="">
+                    <label for="firstname" style="width: 100px; height: 30px; line-height: 30px;" ><?= $this->translate('payment.payone-seamless.firstname') ?>:</label>
+                    <input id="firstname" type="text" name="firstname" value="" style="width: 200px; border: 1px solid rgb(0, 0, 0);" >
+                    <label for="lastname" style="width: 100px; height: 30px; line-height: 30px;" ><?= $this->translate('payment.payone-seamless.pay.lastname') ?>:</label>
+                    <input id="lastname" type="text" name="lastname" value="" style="width: 200px; border: 1px solid rgb(0, 0, 0);" >
                 </div>
 
                 <div id="errorOutput"></div>
