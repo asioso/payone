@@ -8,12 +8,14 @@
  *
  */
 
-namespace AppBundle\Ecommerce;
+namespace AppBundle\Ecommerce\DataProcessor;
 
 
+use PayoneBundle\Ecommerce\IDataProcessor;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\AbstractCart;
-use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
+use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICartItem;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractPaymentInformation;
+use Pimcore\Model\DataObject\Product;
 
 /**
  * Class DataProcessor
@@ -26,43 +28,27 @@ class DataProcessor implements IDataProcessor
      * @param AbstractPaymentInformation $information
      * @param AbstractCart $cart
      * @return array
+     * @throws \Exception
      */
     public function retrievePersonalData(AbstractPaymentInformation &$information, AbstractCart &$cart)
     {
 
-        $checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
-        $deliveryData = $checkoutManager->getCheckoutStep('deliveryaddress')->getData();
+        $object = $information->getObject();
+
 
 
         $data = array(
-            #"salutation" => "Mr.",
-            "firstname" => $deliveryData->addressFirstname,
-            "lastname" => $deliveryData->addressLastname,
-            "street" => $deliveryData->addressStreet,
-            "zip" => $deliveryData->addressZip,
-            "city" => $deliveryData->addressCity,
-            "country" => $deliveryData->addressCountryCode,
-            "email" => $deliveryData->addressEmail,
+            "firstname" => $object->get('customerFirstname'),
+            "lastname" => $object->get('customerLastname'),
+            "street" => $object->get('customerStreet'),
+            "zip" => $object->get('customerZip'),
+            "city" => $object->get('customerCity'),
+            "country" => $object->get('customerCountry'),
+            "email" => $object->get('customerEmail'),
         );
 
-        if ($deliveryData->addressCompany) {
-            $data['company'] = $deliveryData->addressCompany;
-        }
-
-        if ($deliveryData->checkDelivery == true) {
-            $data = array(
-                "firstname" => $deliveryData->billingFirstname,
-                "lastname" => $deliveryData->billingLastname,
-                "street" => $deliveryData->billingStreet,
-                "zip" => $deliveryData->billingZip,
-                "city" => $deliveryData->billingCity,
-                "country" => $deliveryData->billingCountryCode,
-                "email" => $deliveryData->billingEmail,
-            );
-
-            if ($deliveryData->billingCompany) {
-                $data['company'] = $deliveryData->billingCompany;
-            }
+        if ($company =  $object->get('customerCompany')) {
+            $data['company'] = $company;
         }
 
         return $data;
@@ -74,6 +60,8 @@ class DataProcessor implements IDataProcessor
      * @param AbstractPaymentInformation $information
      * @param AbstractCart $cart
      * @return array
+     *
+     * @throws \Exception
      */
     public function retrieveShippingData(AbstractPaymentInformation &$information, AbstractCart &$cart)
     {
@@ -88,11 +76,29 @@ class DataProcessor implements IDataProcessor
             "shipping_country" => $object->get('deliveryCountry'),
         );
         if ($object->get('deliveryCompany') != null) {
-            $data["shipping_company"] = $object->get('deliveryCompany');
+            $data["shipping_company"] = $object->get('company');
         }
-
         return $data;
 
     }
 
+    /**
+     * return an array ['id'=> <itemId>, 'name'=><itemName>]
+     *  is used to generate invoice data
+     * @param $cartItem
+     * @return array
+     */
+    public function retrieveInvoiceData($cartItem)
+    {
+        if($cartItem instanceof ICartItem){
+
+            $product = $cartItem->getProduct();
+            if($product instanceof Product){
+                return array('id'=> $product->getId(), 'name'=> $product->getName());
+            }
+            throw new \InvalidArgumentException(sprintf('%s is not supported by %s', get_class($product), get_class($this)));
+        }
+
+        throw new \InvalidArgumentException(sprintf('%s is not supported by %s', get_class($cartItem), get_class($this)));
+    }
 }
