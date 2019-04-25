@@ -123,7 +123,16 @@
         SeamlessHandler.startPayment(container, serializedForm);
     }
 
+
 </script>
+<style>
+    label,
+    span,
+    input {
+        margin:5px 15px 5px 0;
+    }
+</style>
+
 <div class="panel-body">
     <div class="checkout-dropdown payone-checkout-dropdown">
         <form name="paymentform" id="ccform" action="" method="post">

@@ -176,11 +176,13 @@ class BsPayoneController extends AbstractCartAware
                 }
 
             }catch(\Exception $e){
+                Logger::error($e->getMessage());
                 //try to cancel the order cancel
                 try{
                     $checkoutManager->cancelStartedOrderPayment();
                 }catch (\Exception $e){
                     //
+                    Logger::error($e->getMessage());
                 }
                 //no specific handling
             }
