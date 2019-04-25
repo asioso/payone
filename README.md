@@ -225,6 +225,18 @@ We need some information from earlier checkout steps, so your implementation of 
 Take a look at [this example](https://bitbucket.org/asioso/payone/src/master/examples/DataProcessor/DataProcessor.php)
 
 
+
+### Callback url
+
+you need to register your application's callback address in payone's merchant service portal.
+it uses the the static route you defined earlier, and will look like this:
+
+```
+https://<your.domain>/de/paymentAction/BsPayone/confirm-payment-server-side
+
+```
+
+
 ### Any Questsion
 
 write to fabian.pechstein@asioso.com
