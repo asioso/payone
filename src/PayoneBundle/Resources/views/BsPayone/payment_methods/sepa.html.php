@@ -52,7 +52,7 @@
         <form name="sepaform" id="sepaform" action="" method="post">
             <fieldset>
                 <div class="alert alert-danger invoice-checkbox-error payone-checkbox-error" style="display:none;">
-                    <?= $this->translate('payment.payone-seamless.checkbox-not-checked') ?>
+                    <?= $this->translate('payment.payone-seamless.checkbox-not-checked',[], 'PayoneBundle') ?>
                 </div>
 
                 <input type="hidden" class="payment-type" name="paymentType" value="SEPA"/>
@@ -73,7 +73,7 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <input id="sepasubmit" type="button"
-                               value="<?= $this->translate('payment.payone-seamless.pay.now') ?>"
+                               value="<?= $this->translate('payment.payone-seamless.pay.now',[], 'PayoneBundle') ?>"
                                class="btn btn-primary-red">
                     </div>
                 </div>

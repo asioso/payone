@@ -29,16 +29,16 @@
             <fieldset>
                 <input type="hidden" class="payment-type" name="paymentType" value="PAYDIRECT">
                 <div class="alert alert-danger invoice-checkbox-error payone-checkbox-error" style="display:none;">
-                    <?= $this->translate('payment.payone-seamless.checkbox-not-checked') ?>
+                    <?= $this->translate('payment.payone-seamless.checkbox-not-checked',[], 'PayoneBundle') ?>
                 </div>
 
                 <input type="hidden" class="payment-type" name="paymentType" value="SOFORT"/>
 
                 <select>
-                    <option value="DE" selected><?= $this->translate('Germany') ?></option>
-                    <option value="AT"><?= $this->translate('Austria') ?></option>
-                    <option value="CH"><?= $this->translate('Switzerland') ?></option>
-                    <option value="NL"><?= $this->translate('Netherlands') ?></option>
+                    <option value="DE" selected><?= $this->translate('payment.country.germany',[], 'PayoneBundle') ?></option>
+                    <option value="AT" ><?= $this->translate('payment.country.austria',[], 'PayoneBundle') ?></option>
+                    <option value="CH"><?= $this->translate('payment.country.switzerland',[], 'PayoneBundle') ?></option>
+                    <option value="NL"><?= $this->translate('payment.country.netherlands',[], 'PayoneBundle') ?></option>
                 </select>
 
 

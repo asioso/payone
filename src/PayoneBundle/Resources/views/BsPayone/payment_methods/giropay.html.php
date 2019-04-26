@@ -35,13 +35,13 @@
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <label for="bankCountry"><?= $this->translate('payment.payone-seamless.giropay.bankCountry') ?> </label>
+                        <label for="bankCountry"><?= $this->translate('payment.payone-seamless.giropay.bankCountry',[], 'PayoneBundle') ?> </label>
                         <select id="bankCountry" name="bankCountry">
-                            <option value="DE" selected><?= $this->translate('Germany') ?></option>
-                            <option value="AT" ><?= $this->translate('Austria') ?></option>
-                            <option value="CH"><?= $this->translate('Switzerland') ?></option>
-                            <option value="NL"><?= $this->translate('Netherlands') ?></option>
-                            <option value="PL"><?= $this->translate('Poland') ?></option>
+                            <option value="DE" selected><?= $this->translate('payment.country.germany',[], 'PayoneBundle') ?></option>
+                            <option value="AT" ><?= $this->translate('payment.country.austria',[], 'PayoneBundle') ?></option>
+                            <option value="CH"><?= $this->translate('payment.country.switzerland',[], 'PayoneBundle') ?></option>
+                            <option value="NL"><?= $this->translate('payment.country.netherlands',[], 'PayoneBundle') ?></option>
+                            <option value="PL"><?= $this->translate('payment.country.poland',[], 'PayoneBundle') ?></option>
                         </select>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <input id="giropayformsubmit" type="button" value="<?= $this->translate('payment.payone-seamless.pay.now') ?>" class="btn btn-primary-red js-payone-payment-submit" >
+                        <input id="giropayformsubmit" type="button" value="<?= $this->translate('payment.payone-seamless.pay.now',[], 'PayoneBundle') ?>" class="btn btn-primary-red js-payone-payment-submit" >
                     </div>
                 </div>
             </fieldset>

@@ -74,9 +74,9 @@
                         </div>
                         <div class="col col-sm-9 payment-text" >
                             <h4 class="panel-title">
-                                <?= $this->translate('payment.payone-seamless.payment-method.' . $paymentMethod) ?>
+                                <?= $this->translate('payment.payone-seamless.payment-method.' . $paymentMethod,[], 'PayoneBundle') ?>
                             </h4>
-                            <p><?= $this->translate('payment.payone-seamless.payment-method.description.' . $paymentMethod) ?></p>
+                            <p><?= $this->translate('payment.payone-seamless.payment-method.description.' . $paymentMethod,[], 'PayoneBundle') ?></p>
                         </div>
                     </div>
                 </div>
@@ -91,7 +91,7 @@
                             <form>
                                 <input type="hidden" class="payment-type" name="paymentType"
                                        value="<?= $paymentMethod ?>"/>
-                                <a class="btn btn-primary-red js-payone-payment-submit"><?= $this->translate('payment.payone-seamless.pay-now.' . $paymentMethod) ?></a>
+                                <a class="btn btn-primary-red js-payone-payment-submit"><?= $this->translate('payment.payone-seamless.pay-now.' . $paymentMethod,[], 'PayoneBundle') ?></a>
                             </form>
                         </div>
                     </div>

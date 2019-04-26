@@ -1,4 +1,11 @@
 payment:
+    country:
+        austria: "Austria"
+        germany: "Germany"
+        switzerland: "Switzerland"
+        poland: "Poland"
+        netherlands: "Netherlands"
+
     payone-seamless:
         pay.validation-message-check: "Please check your data!"
         checkbox-not-checked: "Please check your data!"
