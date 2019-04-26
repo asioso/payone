@@ -107,9 +107,8 @@
         }
         else {
             //console.log(response);
-            //TODO SHOW ERROR MESSAGES!
             $('#loading').hide();
-            $('#ccError').after("<p><?= $this->translate('payment .payone-seamless.pay.validation-message-check') ?></p>")
+            $('#ccError').after("<p><?= $this->translate('payment.payone-seamless.pay.validation-message-check') ?></p>")
         }
 
     }
