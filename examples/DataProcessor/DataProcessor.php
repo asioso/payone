@@ -11,7 +11,7 @@
 namespace AppBundle\Ecommerce\DataProcessor;
 
 
-use PayoneBundle\Ecommerce\IDataProcessor;
+use PayoneBundle\Model\AbstractDataProcessor;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\AbstractCart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICartItem;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractPaymentInformation;
@@ -21,7 +21,7 @@ use Pimcore\Model\DataObject\Product;
  * Class DataProcessor
  * @package AppBundle\Ecommerce
  */
-class DataProcessor implements IDataProcessor
+class DataProcessor extends AbstractDataProcessor
 {
 
     /**
@@ -38,17 +38,17 @@ class DataProcessor implements IDataProcessor
 
 
         $data = array(
-            "firstname" => $object->get('customerFirstname'),
-            "lastname" => $object->get('customerLastname'),
-            "street" => $object->get('customerStreet'),
-            "zip" => $object->get('customerZip'),
-            "city" => $object->get('customerCity'),
-            "country" => $object->get('customerCountry'),
-            "email" => $object->get('customerEmail'),
+            self::PERSONAL_FIRSTNAME => $object->get('customerFirstname'),
+            self::PERSONAL_LASTNAME => $object->get('customerLastname'),
+            self::PERSONAL_STREET => $object->get('customerStreet'),
+            self::PERSONAL_ZIP => $object->get('customerZip'),
+            self::PERSONAL_CITY => $object->get('customerCity'),
+            self::PERSONAL_COUNTRY => $object->get('customerCountry'),
+            self::PERSONAL_EMAIL => $object->get('customerEmail'),
         );
 
         if ($company =  $object->get('customerCompany')) {
-            $data['company'] = $company;
+            $data[self::PERSONAL_COMPANY] = $company;
         }
 
         return $data;
@@ -68,15 +68,15 @@ class DataProcessor implements IDataProcessor
 
         $object = $information->getObject();
         $data = array(
-            "shipping_firstname" => $object->get('deliveryFirstname'),
-            "shipping_lastname" => $object->get('deliveryLastname'),
-            "shipping_street" => $object->get('deliveryStreet'),
-            "shipping_zip" => $object->get('deliveryZip'),
-            "shipping_city" => $object->get('deliveryCity'),
-            "shipping_country" => $object->get('deliveryCountry'),
+            self::SHIPPING_FIRSTNAME => $object->get('deliveryFirstname'),
+            self::SHIPPING_LASTNAME => $object->get('deliveryLastname'),
+            self::SHIPPING_STREET => $object->get('deliveryStreet'),
+            self::SHIPPING_ZIP => $object->get('deliveryZip'),
+            self::SHIPPING_CITY => $object->get('deliveryCity'),
+            self::SHIPPING_COUNTRY => $object->get('deliveryCountry'),
         );
         if ($object->get('deliveryCompany') != null) {
-            $data["shipping_company"] = $object->get('company');
+            $data[self::SHIPPING_COMPANY] = $object->get('company');
         }
         return $data;
 
@@ -94,7 +94,7 @@ class DataProcessor implements IDataProcessor
 
             $product = $cartItem->getProduct();
             if($product instanceof Product){
-                return array('id'=> $product->getId(), 'name'=> $product->getName());
+                return array(self::INVOICE_ITEM_ID=> $product->getId(), self::INVOICE_ITEM_NAME=> $product->getName());
             }
             throw new \InvalidArgumentException(sprintf('%s is not supported by %s', get_class($product), get_class($this)));
         }

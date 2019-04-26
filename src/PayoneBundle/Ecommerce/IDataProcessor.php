@@ -26,7 +26,7 @@ interface IDataProcessor
      * @param AbstractCart $cart
      * @return array
      */
-    public function retrievePersonalData(AbstractPaymentInformation &$information, AbstractCart &$cart);
+    public function getPersonalData(AbstractPaymentInformation &$information, AbstractCart &$cart);
 
 
     /**
@@ -34,7 +34,7 @@ interface IDataProcessor
      * @param AbstractCart $cart
      * @return array
      */
-    public function retrieveShippingData(AbstractPaymentInformation &$information, AbstractCart &$cart);
+    public function getShippingData(AbstractPaymentInformation &$information, AbstractCart &$cart);
 
     /**
      * return an array ['id'=> <itemId>, 'name'=><itemName>]
@@ -42,7 +42,7 @@ interface IDataProcessor
      * @param $cartItem
      * @return array
      */
-    public function retrieveInvoiceData($cartItem);
+    public function getInvoiceData($cartItem);
 
 
 }

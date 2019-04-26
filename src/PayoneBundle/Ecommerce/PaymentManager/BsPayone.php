@@ -407,7 +407,7 @@ class BsPayone extends AbstractPayment
     public function getShippingConfig(AbstractPaymentInformation &$information, AbstractCart &$cart, $lang = "de")
     {
 
-        $data =  $this->processor->retrieveShippingData($information, $cart);
+        $data =  $this->processor->getShippingData($information, $cart);
 
         return $data;
     }
@@ -421,7 +421,7 @@ class BsPayone extends AbstractPayment
     public function getPersonalConfig(AbstractPaymentInformation &$information, AbstractCart &$cart, $lang = "de")
     {
 
-        $data =  $this->processor->retrievePersonalData($information, $cart);
+        $data =  $this->processor->getPersonalData($information, $cart);
         $data['language'] = $lang;
 
 
@@ -1201,7 +1201,7 @@ class BsPayone extends AbstractPayment
 
         $c = 1; //starts at 1!!!!
         foreach ($cart->getItems() as $cartItem) {
-            $tmpData= $this->processor->retrieveInvoiceData($cartItem);
+            $tmpData= $this->processor->getInvoiceData($cartItem);
 
             $cartData["id[$c]"] = $tmpData['id'];
             //needs to be in cents
