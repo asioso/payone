@@ -13,6 +13,7 @@ namespace PayoneBundle\Ecommerce\PaymentManager;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Stream;
+use PayoneBundle\Model\AbstractDataProcessor;
 use PayoneBundle\PayoneBundle;
 use PayoneBundle\Registry\IRegistry;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\Cart;
@@ -272,8 +273,8 @@ class BsPayone extends AbstractPayment
             $class = $options['data_processor'];
 
             $instance  = new $class();
-            if(!$instance instanceof IDataProcessor ){
-                throw new \Exception(sprintf('your DataProcessor must implement interface %s', IDataProcessor::class ));
+            if(!$instance instanceof AbstractDataProcessor ){
+                throw new \Exception(sprintf('your DataProcessor must extend  %s', AbstractDataProcessor::class ));
             }
 
             $this->processor = $instance;
