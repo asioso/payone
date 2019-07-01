@@ -9,6 +9,8 @@
 
 
 
+![payment_frame_screenshot][frame]         
+
 ## Installation
 
 ### composer
@@ -42,7 +44,6 @@ composer require asioso/payone:dev-master
 
 ```
 
-tadaaa
 
 ### Enable the Bundle in the Extension Manager
 
@@ -234,3 +235,4 @@ write to info@asioso.com
 
 
 [route]: https://github.com/asioso/payone/raw/master/documentation/img/static_routes.png "Extension Manager"
+[frame]: https://github.com/asioso/payone/raw/master/documentation/img/payment_frame.png "Payment Frame"
