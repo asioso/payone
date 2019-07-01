@@ -1,4 +1,4 @@
-#PayOne Payment Bundle
+# PayOne Payment Bundle
 
 
 ## Prerequisites
@@ -9,33 +9,22 @@
 
 
 
-##Installation
+## Installation
 
-###composer
+### composer
 in your composer.json file add the following repo under your
 
 ```json
 "repositories": [
     {
       "type": "vcs",
-      "url":  "git@bitbucket.org:asioso/payone.git"
+      "url":  "git@github.com:asioso/payone.git"
     }
   ],
 ```
 
 if this is a private repo, use the following and you will need to add your oauth credentials during the process.
 
-```json
-"repositories": [
-    {
-      "type": "vcs",
-      "url":  "https://bitbucket.org:asioso/payone.git"
-    }
-  ],
-``` 
- 
-
-after that make sure you have access to the repo and added your ssh key to your bitbucket account.
 test if composer can find the package.
 
 ```
@@ -95,6 +84,7 @@ prefix,controller,action
 
 
 ## Configuration
+
 add payone as payment provider in your e-commerce configuration. Use payone as payment provider in your checkout manager: 
 
 ```
@@ -221,8 +211,9 @@ Below you can see the most crucial part in the payment frame action:
 
 
 ### DataProcessor
+
 We need some information from earlier checkout steps, so your implementation of this class will be used to fill in personal Data and shipping data.
-Take a look at [this example](https://bitbucket.org/asioso/payone/src/master/examples/DataProcessor/DataProcessor.php)
+Take a look at [this example](https://github.com/asioso/payone/src/master/examples/DataProcessor/DataProcessor.php)
 
 
 
@@ -242,4 +233,4 @@ https://<your.domain>/de/paymentAction/BsPayone/confirm-payment-server-side
 write to fabian.pechstein@asioso.com
 
 
-[route]: https://bitbucket.org/asioso/payone/raw/master/documentation/img/static_routes.png "Extension Manager"
+[route]: https://github.com/asioso/payone/raw/master/documentation/img/static_routes.png "Extension Manager"
