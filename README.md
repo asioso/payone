@@ -230,7 +230,7 @@ https://<your.domain>/de/paymentAction/BsPayone/confirm-payment-server-side
 
 ### Any Questsion
 
-write to fabian.pechstein@asioso.com
+write to info@asioso.com
 
 
 [route]: https://github.com/asioso/payone/raw/master/documentation/img/static_routes.png "Extension Manager"

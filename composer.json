@@ -12,6 +12,12 @@
   "homepage": "https://www.asioso.com",
   "authors": [
     {
+      "name": "asioso GmbH",
+      "homepage": "https://www.asioso.com",
+      "email": "info@asioso.de",
+      "role": "Developer"
+    },
+    {
       "name": "Fabian Pechstein",
       "email": "fabian.pechstein@asioso.com",
       "homepage": "https://www.asioso.com",
