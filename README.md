@@ -162,7 +162,7 @@ providers:
 
 #### Enable Payment Provider
 
-update your payment controller to support payone as payment provider. take a look at  [this controller example](https://bitbucket.org/asioso/payone/src/master/examples/Controller/PaymentController.php)
+update your payment controller to support payone as payment provider. take a look at  [this controller example](https://github.com/asioso/payone/blob/master/examples/Controller/PaymentController.php)
 Below you can see the most crucial part in the payment frame action:
 
 
@@ -213,7 +213,7 @@ Below you can see the most crucial part in the payment frame action:
 ### DataProcessor
 
 We need some information from earlier checkout steps, so your implementation of this class will be used to fill in personal Data and shipping data.
-Take a look at [this example](https://github.com/asioso/payone/src/master/examples/DataProcessor/DataProcessor.php)
+Take a look at [this example](https://github.com/asioso/payone/blob/master/examples/DataProcessor/DataProcessor.php)
 
 
 
