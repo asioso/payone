@@ -14,33 +14,10 @@
 ## Installation
 
 ### composer
-in your composer.json file add the following repo under your
-
-```json
-"repositories": [
-    {
-      "type": "vcs",
-      "url":  "git@github.com:asioso/payone.git"
-    }
-  ],
-```
-
-if this is a private repo, use the following and you will need to add your oauth credentials during the process.
-
-test if composer can find the package.
-
-```
-composer search asioso
-
->>>>>
-asioso/payone A bundle to help with payone  
-
-```
-
 add the bundle to composer.json with
 
 ```
-composer require asioso/payone:dev-master
+composer require asioso/pimcore-payone-module
 
 ```
 
