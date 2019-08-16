@@ -758,7 +758,9 @@ class BsPayone extends AbstractPayment
 
                 $pseudocardpan = $config['pseudocardpan'];
 
+
                 $parameters = array(
+                    "ip" => $config['clientIp'],
                     "clearingtype" => "cc", // cc for credit card
                     "reference" => $orderIdent,
                     "amount" => $this->getAmount($price),

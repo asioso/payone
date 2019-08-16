@@ -158,6 +158,7 @@ class BsPayoneController extends AbstractCartAware
                 'bic' => $request->get('bic'),
                 'mandate_identification' => $request->get('mandate'),
                 'bankCountry' => $request->get('bankCountry'),
+                'clientIp' => empty($request->getClientIp()) ? $_SERVER['REMOTE_ADDR'] : $request->getClientIp(),
             ];
 
             try{
