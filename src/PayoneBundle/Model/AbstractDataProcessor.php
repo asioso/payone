@@ -26,6 +26,7 @@ abstract class AbstractDataProcessor implements IDataProcessor
     const PERSONAL_COUNTRY = "country";
     const PERSONAL_EMAIL = "email";
     const PERSONAL_COMPANY = "company";
+    const PERSONAL_PHONE = "telephonenumber";
     const PERSONAL_VAT = "vatid";
 
 
@@ -37,6 +38,7 @@ abstract class AbstractDataProcessor implements IDataProcessor
     const SHIPPING_COUNTRY = "shipping_country";
     const SHIPPING_EMAIL = "shipping_email";
     const SHIPPING_COMPANY = "shipping_company";
+
 
     const INVOICE_ITEM_ID = "id";
     const INVOICE_ITEM_NAME = "name";
@@ -120,6 +122,7 @@ abstract class AbstractDataProcessor implements IDataProcessor
                 self::PERSONAL_ZIP,
                 self::PERSONAL_CITY,
                 self::PERSONAL_COUNTRY,
+                self::PERSONAL_PHONE,
             ],
             $data))
         ) {
