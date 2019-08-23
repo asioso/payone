@@ -11,10 +11,12 @@
 namespace PayoneBundle;
 
 
+use Doctrine\DBAL\Migrations\AbortMigrationException;
 use Doctrine\DBAL\Migrations\Version;
 use Doctrine\DBAL\Schema\Schema;
 use PayoneBundle\Registry\Registry;
 use Pimcore\Extension\Bundle\Installer\MigrationInstaller;
+use Pimcore\Model\DataObject\ClassDefinition\Service;
 use Pimcore\Model\DataObject\Objectbrick;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
@@ -53,6 +55,7 @@ class Installer extends MigrationInstaller
      *
      * @param Schema $schema
      * @param Version $version
+     * @throws AbortMigrationException
      */
     public function migrateInstall(Schema $schema, Version $version)
     {
@@ -107,21 +110,20 @@ class Installer extends MigrationInstaller
             '/^objectbrick_(.*)_export\.json$/'
         );
         foreach ($bricks as $key => $path) {
-            try {
-                $brick = Objectbrick\Definition::getByKey($key);
-                if ($brick) {
-                    $this->outputWriter->write(sprintf(
-                        '     <comment>WARNING:</comment> Skipping object brick "%s" as it already exists',
-                        $key
-                    ));
-                    continue;
-                }
-            } catch (\Exception $e) {
+            if ($brick = Objectbrick\Definition::getByKey($key)) {
+                $this->outputWriter->write(sprintf(
+                    '     <comment>WARNING:</comment> Skipping object brick "%s" as it already exists',
+                    $key
+                ));
+
+                continue;
+            } else {
                 $brick = new Objectbrick\Definition();
                 $brick->setKey($key);
             }
+
             $data = file_get_contents($path);
-            $success = \Pimcore\Model\DataObject\ClassDefinition\Service::importObjectBrickFromJson($brick, $data);
+            $success = Service::importObjectBrickFromJson($brick, $data);
             if (!$success) {
                 throw new AbortMigrationException(sprintf(
                     'Failed to create object brick "%s"',

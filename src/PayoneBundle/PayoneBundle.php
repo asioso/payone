@@ -16,8 +16,9 @@ use Pimcore\Extension\Bundle\AbstractPimcoreBundle;
  * Class PayoneBundle
  * @package PayoneBundle
  */
-class PayoneBundle extends AbstractPimcoreBundle implements \Pimcore\Extension\Bundle\PimcoreBundleInterface
+class PayoneBundle extends AbstractPimcoreBundle
 {
+
 
     public function getInstaller()
     {
@@ -41,11 +42,11 @@ class PayoneBundle extends AbstractPimcoreBundle implements \Pimcore\Extension\B
 
     public function getVersion()
     {
-        return 'v0.2';
+        return 'v1.2';
     }
 
     public static function getSolutionVersion(){
-        return "v0.2";
+        return "v1.2";
     }
 
 }
