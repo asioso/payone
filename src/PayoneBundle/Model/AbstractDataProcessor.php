@@ -114,15 +114,15 @@ abstract class AbstractDataProcessor implements IDataProcessor
      */
     private function verifyPersonalData(array $data)
     {
-        if (!empty(array_intersect_key(
+        if ( 7 == sizeof(array_intersect_key(
             [
-                self::PERSONAL_FIRSTNAME,
-                self::PERSONAL_LASTNAME,
-                self::PERSONAL_STREET,
-                self::PERSONAL_ZIP,
-                self::PERSONAL_CITY,
-                self::PERSONAL_COUNTRY,
-                self::PERSONAL_PHONE,
+                self::PERSONAL_FIRSTNAME => true,
+                self::PERSONAL_LASTNAME => true,
+                self::PERSONAL_STREET => true,
+                self::PERSONAL_ZIP => true,
+                self::PERSONAL_CITY => true,
+                self::PERSONAL_COUNTRY => true,
+                self::PERSONAL_PHONE => true,
             ],
             $data))
         ) {
@@ -137,14 +137,14 @@ abstract class AbstractDataProcessor implements IDataProcessor
      */
     private function verifyShippingData(array $data)
     {
-        if (!empty(array_intersect_key(
+        if ( 6 == sizeof(array_intersect_key(
             [
-                self::SHIPPING_FIRSTNAME,
-                self::SHIPPING_LASTNAME,
-                self::SHIPPING_STREET,
-                self::SHIPPING_ZIP,
-                self::SHIPPING_CITY,
-                self::SHIPPING_COUNTRY,
+                self::SHIPPING_FIRSTNAME => true,
+                self::SHIPPING_LASTNAME => true,
+                self::SHIPPING_STREET => true,
+                self::SHIPPING_ZIP => true,
+                self::SHIPPING_CITY => true,
+                self::SHIPPING_COUNTRY => true,
             ],
             $data))
         ) {
@@ -159,10 +159,10 @@ abstract class AbstractDataProcessor implements IDataProcessor
      */
     private function verifyInvoiceData(array $data)
     {
-        if (!empty(array_intersect_key(
+        if (2 == sizeof(array_intersect_key(
             [
-                self::INVOICE_ITEM_ID,
-                self::INVOICE_ITEM_NAME,
+                self::INVOICE_ITEM_ID => true,
+                self::INVOICE_ITEM_NAME => true,
             ],
             $data))
         ) {
