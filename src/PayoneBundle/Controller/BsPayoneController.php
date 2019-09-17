@@ -30,6 +30,20 @@ class BsPayoneController extends AbstractCartAware
 {
 
     /**
+     * @var \PayoneBundle\Model\IPaymentURLGenerator
+     */
+    private $generator;
+
+    /**
+     * BsPayoneController constructor.
+     * @param \PayoneBundle\Model\IPaymentURLGenerator $generator
+     */
+    public function __construct(\PayoneBundle\Model\IPaymentURLGenerator $generator)
+    {
+        $this->generator = $generator;
+    }
+
+    /**
      * commits payment with payment type PREPAYMENT
      */
     public function prepaymentAction()
@@ -131,26 +145,27 @@ class BsPayoneController extends AbstractCartAware
             $orderNumber = $order->getOrdernumber();
         }
         if ($paymentType = $request->get('paymentType')) {
+
+            $urlConfig = array(
+                'schemaAndHost' => $request->getSchemeAndHttpHost(),
+                'language' => $language,
+            );
+
             $config = [
-                'successURL' => $request->getSchemeAndHttpHost() . $this->generateUrl('payone', ['action' => 'complete', 'id' => base64_encode($paymentInformation->getObject()->getId()),
-                        'state' => BsPayone::PAYMENT_RETURN_STATE_SUCCESS, 'prefix' => $language]),
-                'failureURL' => $request->getSchemeAndHttpHost() . $this->generateUrl('payone', ['action' => 'complete', 'id' => base64_encode($paymentInformation->getObject()->getId()),
-                        'state' => BsPayone::PAYMENT_RETURN_STATE_FAILURE, 'prefix' => $language]),
-                'cancelURL' => $request->getSchemeAndHttpHost() . $this->generateUrl('payone', ['action' => 'complete', 'id' => base64_encode($paymentInformation->getObject()->getId()),
-                        'state' => BsPayone::PAYMENT_RETURN_STATE_CANCEL, 'prefix' => $language]),
-                'serviceURL' => Tool::getHostUrl(),
-                'pendingURL' => $request->getSchemeAndHttpHost() . $this->generateUrl('payone', ['action' => 'complete', 'id' => base64_encode($paymentInformation->getObject()->getId()),
-                        'state' => BsPayone::PAYMENT_RETURN_STATE_PENDING, 'prefix' => $language]),
-                'confirmURL' => $request->getSchemeAndHttpHost() . $this->generateUrl('payone', ['action' => 'confirm-payment-server-side', 'elementsclientauth' => 'disabled']),
-                'completedURL' => $request->getSchemeAndHttpHost() . $this->generateUrl('payone', ['action' => 'completed', 'controller'=> 'checkout', 'id' => $order->getId(), 'prefix' => $language]),
-                    #$this->pimcoreUrl(['action' => 'completed', 'controller' => 'checkout', 'id' => $this->order->getId(),'prefix'=>$this->language], 'action', true)
+                'successURL' => $this->generator->getSuccessUrl($paymentInformation, $urlConfig),
+                'failureURL' => $this->generator->getFailureUrl($paymentInformation, $urlConfig),
+                'cancelURL' => $this->generator->getCancelUrl($paymentInformation, $urlConfig),
+                'serviceURL' => $this->generator->getServiceUrl($paymentInformation, $urlConfig),
+                'pendingURL' => $this->generator->getPendingUrl($paymentInformation, $urlConfig),
+                'confirmURL' => $this->generator->getConfirmUrl($paymentInformation, $urlConfig),
+                'completedURL' => $this->generator->getCompletedUrl($paymentInformation, $urlConfig),
                 'paymentInfo' => $paymentInformation,
                 'paymentType' => $paymentType,
                 'cart' => $this->getCart(),
                 'birthday' => $request->get('birth'),
                 'orderDescription' => $orderNumber,
                 'reference' => $orderNumber,
-                'lang' => 'de',
+                'lang' => $language,
                 'pseudocardpan' => $request->get('pseudocardpan'),
                 'truncatedcardpan' => $request->get('truncatedcardpan'),
                 'cardexpiredResponse' => $request->get('cardexpiredResponse'),

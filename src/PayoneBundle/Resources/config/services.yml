@@ -43,3 +43,9 @@ services:
     PayoneBundle\Registry\IRegistry: '@PayoneBundle\Registry\Registry'
 
     PayoneBundle\Registry\Registry: ~
+
+    PayoneBundle\Model\IPaymentURLGenerator: '@PayoneBundle\Model\DefaultPaymentURLGenerator'
+
+    PayoneBundle\Model\DefaultPaymentURLGenerator:
+        arguments:
+            $router: '@router'
