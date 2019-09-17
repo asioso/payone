@@ -4,7 +4,7 @@
 ## Prerequisites
 * PHP 7.1 or higher (https://secure.php.net/)
 * Composer (https://getcomposer.org/download/)
-* A Pimcore  Installation using the pimcore e-commerce framework (v5.7 or higher)
+* A Pimcore  Installation using the **pimcore e-commerce framework** (v5.7 or higher)
 * A PAYONE account or test account (https://www.payone.com/kontakt/)
 
 
@@ -204,6 +204,13 @@ it uses the the static route you defined earlier, and will look like this:
 https://<your.domain>/de/paymentAction/BsPayone/confirm-payment-server-side
 
 ```
+
+
+### Overriding default Payment URLs
+In case you don't want to rely on the generated success/pending/failure URLs provided by this bundle (based on static routes- see above), there is another way using symfony's Dependency Injection component.
+
+Register a new CompilerPass, take a look at [this example](https://github.com/asioso/payone/blob/master/examples/DependencyInjection/PaymentUrlGeneratorCompilerPass.php), which sets a tailored generator service that generates a custom completed-route, but still relies on the default implementation for the remaining URLs.
+see [this class](https://github.com/asioso/payone/blob/master/examples/UrlGenerator/MyPaymentUrlGenerator.php) for more details. 
 
 
 ### Any Questsion
