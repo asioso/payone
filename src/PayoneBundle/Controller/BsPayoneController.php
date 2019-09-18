@@ -165,7 +165,7 @@ class BsPayoneController extends AbstractCartAware
                 'birthday' => $request->get('birth'),
                 'orderDescription' => $orderNumber,
                 'reference' => $orderNumber,
-                'lang' => $language,
+                'language' => $language,
                 'pseudocardpan' => $request->get('pseudocardpan'),
                 'truncatedcardpan' => $request->get('truncatedcardpan'),
                 'cardexpiredResponse' => $request->get('cardexpiredResponse'),

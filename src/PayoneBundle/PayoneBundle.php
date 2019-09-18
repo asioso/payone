@@ -42,11 +42,11 @@ class PayoneBundle extends AbstractPimcoreBundle
 
     public function getVersion()
     {
-        return 'v1.2';
+        return 'v1.2.3';
     }
 
     public static function getSolutionVersion(){
-        return "v1.2";
+        return "v1.2.3";
     }
 
 }

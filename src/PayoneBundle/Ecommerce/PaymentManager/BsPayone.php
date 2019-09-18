@@ -26,6 +26,7 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Payment\AbstractPayme
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Status;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\IPrice;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\Price;
+use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\PriceInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Type\Decimal;
 use Pimcore\FeatureToggles\Features\DebugMode;
 use Pimcore\Logger;
@@ -458,14 +459,14 @@ class BsPayone extends AbstractPayment
     /**
      * Start payment
      *
-     * @param IPrice $price
+     * @param PriceInterface $price
      * @param array $config
      *
      * @return mixed - either an url for a link the user has to follow to (e.g. paypal) or
      *                 an symfony form builder which needs to submitted (e.g. datatrans and wirecard)
      * @throws Exception
      */
-    public function initPayment(IPrice $price, array $config)
+    public function initPayment(PriceInterface $price, array $config)
     {
         $required = $this->getRequiredRequestFields();
         foreach ($required as $property => $null) {
@@ -535,7 +536,7 @@ class BsPayone extends AbstractPayment
         }
 
         $minConfig = $this->getMinimalDefaultParameters(self::METHOD_SEPA);
-        $personalConfig = $this->getPersonalConfig($config['paymentInfo'], $cart);
+        $personalConfig = $this->getPersonalConfig($config['paymentInfo'], $cart, $config['language']);
         $invoiceData = $this->getInvoiceData($cart);
 
         $personalConfig = array_merge($personalConfig, $invoiceData);
@@ -687,7 +688,7 @@ class BsPayone extends AbstractPayment
 
         $parameters = array();
         $minConfig = $this->getMinimalDefaultParameters($paymentType);
-        $personalConfig = $this->getPersonalConfig($config['paymentInfo'], $cart);
+        $personalConfig = $this->getPersonalConfig($config['paymentInfo'], $cart, $config['language']);
         $shippingData = $this->getShippingConfig($config['paymentInfo'], $cart);
         $personalConfig = array_merge($personalConfig, $shippingData);
         $invoiceData = $this->getInvoiceData($cart);
@@ -998,7 +999,7 @@ class BsPayone extends AbstractPayment
      *
      * @return IStatus
      */
-    public function executeDebit(IPrice $price = null, $reference = null)
+    public function executeDebit(PriceInterface $price = null, $reference = null)
     {
         throw new NotImplementedException('executeDebit is not implemented yet.');
     }
@@ -1012,7 +1013,7 @@ class BsPayone extends AbstractPayment
      *
      * @return IStatus
      */
-    public function executeCredit(IPrice $price, $reference, $transactionId)
+    public function executeCredit(PriceInterface $price, $reference, $transactionId)
     {
         throw new NotImplementedException('executeCredit is not implemented yet.');
     }
