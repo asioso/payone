@@ -13,8 +13,8 @@
 
 
     function startPayment() {
-        var form = $('#sofortform');
-        var container = form.closest('.payment-accordion');
+        var form = $("#sofortform");
+        var container = form.closest(".payment-accordion");
         var serializedForm = form.serialize();
         console.log(serializedForm);
         console.log(container);
@@ -31,8 +31,6 @@
                 <div class="alert alert-danger invoice-checkbox-error payone-checkbox-error" style="display:none;">
                     <?= $this->translate('payment.payone-seamless.checkbox-not-checked',[], 'PayoneBundle') ?>
                 </div>
-
-                <input type="hidden" class="payment-type" name="paymentType" value="SOFORT"/>
 
                 <div>
                     <label for="bankcountry"><?= $this->translate('payment.bankcountry',[], 'PayoneBundle') ?></label>

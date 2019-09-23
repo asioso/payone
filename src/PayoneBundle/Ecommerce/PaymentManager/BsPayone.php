@@ -834,7 +834,7 @@ class BsPayone extends AbstractPayment
                     "clearingtype" => "sb",             // sb for Online Bank Transfer
                     "onlinebanktransfertype" => "PNT",  // PNT for Sofort
                     //"bankaccount" => "12345678",
-                    //"bankcountry" => $config['bankcountry'],
+                    "bankcountry" => $config['bankCountry'],
                     //"bankcode" => "88888888",
                     //"iban" => $config['iban'],  // Test data for Sofort
                     //"bic" => $config['bic'],
