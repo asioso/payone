@@ -1,8 +1,12 @@
 
 
 var SeamlessHandler = {
+    pendingOps: null,
+    unloadListener : null,
+
     init: function () {
         this.initEvents();
+        this.pendingOps = new Set();
         var message = SeamlessHandler.popErrorMessage();
         if ('undefined' !== typeof message && message !== null) {
             $('#errormessage').append("<div class=\"alert alert-danger\">" + "<strong>"+message+"</strong>" + "</div>");
@@ -10,6 +14,13 @@ var SeamlessHandler = {
     },
 
     initEvents: function () {
+        var that = this;
+        that.unloadListener = function(event){
+            if (that.pendingOps.size) {
+                event.returnValue = 'There is pending work. Sure you want to leave?';
+            }
+        };
+
         $('.js-payone-payment-submit').on('click', function (e) {
             e.preventDefault();
             let form = $(this).closest('form');
@@ -22,6 +33,8 @@ var SeamlessHandler = {
 
         });
 
+        top.window.addEventListener('beforeunload', that.unloadListener);
+
         $('.panel-default').click(function(){
             $('#errormessage').empty();
         });
@@ -30,25 +43,38 @@ var SeamlessHandler = {
     },
 
     checkMandate: function(container, serializedForm){
-      return new Promise(function(resolve, reject){
+        return new Promise(function(resolve, reject){
 
-          $.get(container.data('check-url') + '?' + serializedForm)
-              .then((function (response) {
-                  resolve(response);
-              }));
-      });
+            $.get(container.data('check-url') + '?' + serializedForm)
+                .then((function (response) {
+                    resolve(response);
+                }));
+        });
     },
 
+    addToPendingWork: function(promise) {
+        var that= this;
+        return new Promise(function(resolve, reject){
+            that.pendingOps.add(promise);
+            var cleanup = () => that.pendingOps.delete(promise);
+            promise.then(cleanup).catch(cleanup);
+            resolve();
+        });
+
+    },
 
     startPayment: function (container, serializedForm) {
-
+        var that = this;
         $('.payone-error').hide();
         $('.payone-checkbox-error').hide();
         container.html(SeamlessHandler.getLoadingDiv());
         SeamlessHandler.scrollTo(container);
 
-        $.get(container.data('generate-redirect-url') + '?' + serializedForm)
+        that.addToPendingWork( $.get(container.data('generate-redirect-url') + '?' + serializedForm)
             .then((function (response) {
+                console.log(response);
+                console.log('right one');
+                top.window.removeEventListener("beforeunload", that.unloadListener);
                 if (response.status === "REDIRECT" && response.url) {
                     top.window.location.href = response.url;
                 }
@@ -57,7 +83,8 @@ var SeamlessHandler = {
                     SeamlessHandler.pushErrorMessage(response.message);
                     top.window.location.reload();
                 }
-            }));
+            }))
+        )
     },
 
 
@@ -66,6 +93,7 @@ var SeamlessHandler = {
     },
 
     scrollTo: function (element) {
+        console.log(element);
         $('html, body').animate({
             scrollTop: element.offset().top - 100
         }, 500);
@@ -90,28 +118,28 @@ var SeamlessHandler = {
         return null;
     },
     storageAvailable:function (type) {
-    try {
-        let storage = window[type],
-            x = '__storage_test__';
-        storage.setItem(x, x);
-        storage.removeItem(x);
-        return true;
-    }
-    catch(e) {
-        return e instanceof DOMException && (
+        try {
+            let storage = window[type],
+                x = '__storage_test__';
+            storage.setItem(x, x);
+            storage.removeItem(x);
+            return true;
+        }
+        catch(e) {
+            return e instanceof DOMException && (
+                    // everything except Firefox
+                e.code === 22 ||
+                // Firefox
+                e.code === 1014 ||
+                // test name field too, because code might not be present
                 // everything except Firefox
-            e.code === 22 ||
-            // Firefox
-            e.code === 1014 ||
-            // test name field too, because code might not be present
-            // everything except Firefox
-            e.name === 'QuotaExceededError' ||
-            // Firefox
-            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-            // acknowledge QuotaExceededError only if there's something already stored
-            storage.length !== 0;
+                e.name === 'QuotaExceededError' ||
+                // Firefox
+                e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+                // acknowledge QuotaExceededError only if there's something already stored
+                storage.length !== 0;
+        }
     }
-}
 
 };
 
