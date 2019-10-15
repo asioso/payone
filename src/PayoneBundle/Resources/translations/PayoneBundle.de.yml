@@ -1,4 +1,6 @@
 payment:
+    bankcountry: "Land der Bank"
+
     country:
         austria: "Österreich"
         germany: "Deutschland"
