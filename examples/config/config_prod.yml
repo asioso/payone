@@ -24,7 +24,7 @@ monolog:
 
         swift:
             type:       swift_mailer
-            from_email: 'info@neyer.de'
+            from_email: 'info@foo.de'
             to_email:   [ 'fabian.pechstein@asioso.com']
             subject:    'An Error Occurred! %%message%%'
             level:      error
