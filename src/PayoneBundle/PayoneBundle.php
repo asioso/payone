@@ -10,7 +10,9 @@
 
 namespace PayoneBundle;
 
+use PackageVersions\Versions;
 use Pimcore\Extension\Bundle\AbstractPimcoreBundle;
+use Pimcore\Extension\Bundle\Traits\PackageVersionTrait;
 
 /**
  * Class PayoneBundle
@@ -19,6 +21,8 @@ use Pimcore\Extension\Bundle\AbstractPimcoreBundle;
 class PayoneBundle extends AbstractPimcoreBundle
 {
 
+    use PackageVersionTrait;
+    const PACKAGE_NAME = 'asioso/pimcore-payone-module';
 
     public function getInstaller()
     {
@@ -40,13 +44,25 @@ class PayoneBundle extends AbstractPimcoreBundle
         return "";
     }
 
-    public function getVersion()
-    {
-        return 'v1.2.3';
-    }
 
     public static function getSolutionVersion(){
-        return "v1.2.3";
+        //code duplication from PackageVersionTrait... sorry
+        $version = Versions::getVersion(self::PACKAGE_NAME);
+
+        // normalizes v2.3.0@9e016f4898c464f5c895c17993416c551f1697d3 to 2.3.0
+        $version = preg_replace('/^v/', '', $version);
+        $version = preg_replace('/@(.+)$/', '', $version);
+
+        return $version;
     }
 
+    /**
+     * Returns the composer package name used to resolve the version
+     *
+     * @return string
+     */
+    protected function getComposerPackageName(): string
+    {
+        return self::PACKAGE_NAME;
+    }
 }
