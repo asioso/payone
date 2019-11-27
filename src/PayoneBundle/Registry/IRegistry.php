@@ -4,10 +4,9 @@
  *
  * Full copyright and license information is available in LICENSE.md which is distributed with this source code.
  *
- *  @copyright  Copyright (c) Asioso GmbH (https://www.asioso.com)
+ * @copyright  Copyright (c) Asioso GmbH (https://www.asioso.com)
  *
  */
-
 
 
 namespace PayoneBundle\Registry;
@@ -33,5 +32,31 @@ interface IRegistry
      */
     public function generateAndStoreExternalReference($internalReference);
 
+    /**
+     * @param $reference
+     * @param $txId
+     * @param $type
+     * @param $data
+     */
+    public function logTransaction($reference, $txId, $type ,$data);
+
+
+    /**
+     * @param $txid
+     * @return array|null
+     */
+    public function findTransactionLogsForTXid($txid);
+
+    /**
+     * @param $internalReference
+     * @return array|null
+     */
+    public function findTransactionLogsForInternalId($internalReference);
+
+    /**
+     * @param $payoneReference
+     * @return array|null
+     */
+    public function findTranslationLogsForPayoneReference($payoneReference);
 
 }

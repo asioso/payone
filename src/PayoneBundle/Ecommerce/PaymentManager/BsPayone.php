@@ -21,9 +21,13 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractPaymentInformation;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\Currency;
+use Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager\OrderAgentInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\IStatus;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Payment\AbstractPayment;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Status;
+use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\StartPaymentRequest\AbstractRequest;
+use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\StartPaymentResponse\SnippetResponse;
+use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\StartPaymentResponse\StartPaymentResponseInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\IPrice;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\Price;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PriceSystem\PriceInterface;
@@ -48,7 +52,7 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\AbstractCart;
  * Class BsPayone
  * @package PayoneBundle\Ecommerce\PaymentManager
  */
-class BsPayone extends AbstractPayment
+class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\PaymentInterface
 {
 
 
@@ -1271,4 +1275,11 @@ class BsPayone extends AbstractPayment
 
     }
 
+
+    public function startPayment(OrderAgentInterface $orderAgent, PriceInterface $price, AbstractRequest $config): StartPaymentResponseInterface
+    {
+        $snippet = $this->initPayment($price, $config->asArray());
+
+        return new SnippetResponse($orderAgent->getOrder(), $snippet);
+    }
 }

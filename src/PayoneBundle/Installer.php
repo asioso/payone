@@ -77,8 +77,8 @@ class Installer extends MigrationInstaller
 
     public function isInstalled()
     {
-        $result = \Pimcore\Db::get()->fetchAll('SHOW TABLES LIKE "' . Registry::TABLE_NAME . '"');
-        return !empty($result);
+        $result = \Pimcore\Db::get()->fetchAll('SHOW TABLES LIKE "' . Registry::TABLE_NAME . '" OR TABLES LIKE "'.Registry::LOG_TABLE_NAME.'"');
+        return 2 == sizeof($result);
     }
 
     public function canBeInstalled()
