@@ -4,7 +4,7 @@
  *
  * Full copyright and license information is available in LICENSE.md which is distributed with this source code.
  *
- * @copyright  Copyright (c) Asioso GmbH (https://www.asioso.com)
+ *  @copyright  Copyright (c) Asioso GmbH (https://www.asioso.com)
  *
  */
 

@@ -4,7 +4,7 @@
  *
  * Full copyright and license information is available in LICENSE.md which is distributed with this source code.
  *
- * @copyright  Copyright (c) Asioso GmbH (https://www.asioso.com)
+ *  @copyright  Copyright (c) Asioso GmbH (https://www.asioso.com)
  *
  */
 
@@ -23,14 +23,14 @@ interface IRegistry
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
-    public function getInternalByExternalReference($payoneReference);
+    public static function getInternalByExternalReference($payoneReference);
 
     /**
      * @param $internalReference
      * @return string
      * @throws \Exception
      */
-    public function generateAndStoreExternalReference($internalReference);
+    public static function generateAndStoreExternalReference($internalReference);
 
     /**
      * @param $reference
@@ -38,25 +38,25 @@ interface IRegistry
      * @param $type
      * @param $data
      */
-    public function logTransaction($reference, $txId, $type ,$data);
+    public static function logTransaction($reference, $txId, $type ,$data);
 
 
     /**
      * @param $txid
      * @return array|null
      */
-    public function findTransactionLogsForTXid($txid);
+    public static function findTransactionLogsForTXid($txid);
 
     /**
      * @param $internalReference
      * @return array|null
      */
-    public function findTransactionLogsForInternalId($internalReference);
+    public static function findTransactionLogsForInternalId($internalReference);
 
     /**
      * @param $payoneReference
      * @return array|null
      */
-    public function findTranslationLogsForPayoneReference($payoneReference);
+    public static function findTranslationLogsForPayoneReference($payoneReference);
 
 }
