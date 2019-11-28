@@ -43,7 +43,8 @@ interface IRegistry
 
     /**
      * @param $txid
-     * @return array|null
+     * @return array|mixed|null
+     * @throws \Exception
      */
     public  function findTransactionLogsForTXid($txid);
 
@@ -55,7 +56,8 @@ interface IRegistry
 
     /**
      * @param $payoneReference
-     * @return array|null
+     * @return array|mixed|null
+     * @throws \Exception
      */
     public  function findTranslationLogsForPayoneReference($payoneReference);
 

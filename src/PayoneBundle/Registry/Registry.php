@@ -123,11 +123,23 @@ class Registry implements IRegistry
 
     /**
      * @param $txid
-     * @return array|null
+     * @return arraynull
+     * @throws \Exception
      */
     public function findTransactionLogsForTXid($txid)
     {
+        $db = Db::get();
+        $result = $db->fetchRow(
+            "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN_TXID . "` = ?",
+            [$txid]
+        );
 
+        if (!$result) {
+            throw new \Exception('txid does not exist');
+        }
+
+
+        return $result;
     }
 
     /**
@@ -141,11 +153,24 @@ class Registry implements IRegistry
 
     /**
      * @param $payoneReference
-     * @return array|null
+     * @return array|mixed|null
+     * @throws \Exception
      */
     public function findTranslationLogsForPayoneReference($payoneReference)
     {
 
+        $db = Db::get();
+        $result = $db->fetchRow(
+            "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN__PAYONE_REFERENCE . "` = ?",
+            [$payoneReference]
+        );
+
+        if (!$result) {
+            throw new \Exception('reference does not exist');
+        }
+
+
+        return $result;
     }
 
 

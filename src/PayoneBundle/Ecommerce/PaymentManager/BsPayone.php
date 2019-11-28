@@ -16,6 +16,7 @@ use GuzzleHttp\Psr7\Stream;
 use PayoneBundle\Model\AbstractDataProcessor;
 use PayoneBundle\PayoneBundle;
 use PayoneBundle\Registry\IRegistry;
+use PayoneBundle\Registry\Registry;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\Cart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
@@ -938,6 +939,10 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
         $paymentStatus = IStatus::STATUS_CANCELLED;
 
+        $logData = $this->registry->findTranslationLogsForPayoneReference($response['reference']);
+
+        $response['clearingtype'] = $logData[Registry::COLUMN_METHOD];
+
         if ($this->validateKey($response['key'])) {
             $authorizedData = array_intersect_key($response, $authorizedData);
             $authorizedData['response'] = var_export($response, true);
@@ -977,7 +982,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             return $status;
         }
-
 
         if ($orderIdent !== null && (($response['status'] == 'APPROVED'))) {
             $paymentStatus = IStatus::STATUS_AUTHORIZED;
