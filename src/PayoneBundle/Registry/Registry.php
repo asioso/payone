@@ -4,7 +4,7 @@
  *
  * Full copyright and license information is available in LICENSE.md which is distributed with this source code.
  *
- *  @copyright  Copyright (c) Asioso GmbH (https://www.asioso.com)
+ * @copyright  Copyright (c) Asioso GmbH (https://www.asioso.com)
  *
  */
 
@@ -13,6 +13,7 @@ namespace PayoneBundle\Registry;
 
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Pimcore\Bundle\NumberSequenceGeneratorBundle\RandomGenerator;
 use Pimcore\Db;
 use Pimcore\Model\Tool\Lock;
 
@@ -40,12 +41,25 @@ class Registry implements IRegistry
     const LOG_LOCK_KEY = 'payony_transaction_log';
 
     /**
+     * @var RandomGenerator
+     */
+    private $generator;
+    /**
+     * Registry constructor.
+     * @param RandomGenerator $generator
+     */
+    public function __construct(RandomGenerator $generator)
+    {
+        $this->generator = $generator;
+    }
+
+    /**
      * @param $payoneReference
      * @return string
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
-    public static function getInternalByExternalReference($payoneReference)
+    public function getInternalByExternalReference($payoneReference)
     {
 
         $db = Db::get();
@@ -66,15 +80,14 @@ class Registry implements IRegistry
      * @return string
      * @throws \Exception
      */
-    public static function generateAndStoreExternalReference($internalReference)
+    public function generateAndStoreExternalReference($internalReference)
     {
         Lock::acquire(self::LOCK_KEY);
 
-        $generator = \Pimcore::getContainer()->get(\Pimcore\Bundle\NumberSequenceGeneratorBundle\RandomGenerator::class);
-        $payone_reference = $generator->generateCode(self::GENERATOR_RANGE, \Pimcore\Bundle\NumberSequenceGeneratorBundle\RandomGenerator::ALPHANUMERIC, self::REFERENCE_LENGTH);
+        $payone_reference = $this->generator->generateCode(self::GENERATOR_RANGE, \Pimcore\Bundle\NumberSequenceGeneratorBundle\RandomGenerator::ALPHANUMERIC, self::REFERENCE_LENGTH);
 
         $db = Db::get();
-        $db->insert(self::LOG_TABLE_NAME, [self::COLUMN_INTERNAL_REFERENCE => $internalReference, self::COLUMN__PAYONE_REFERENCE => $payone_reference]);
+        $db->insert(self::TABLE_NAME, [self::COLUMN_INTERNAL_REFERENCE => $internalReference, self::COLUMN__PAYONE_REFERENCE => $payone_reference]);
 
         Lock::release(self::LOCK_KEY);
 
@@ -88,14 +101,14 @@ class Registry implements IRegistry
      * @param $type
      * @param $data
      */
-    public static function logTransaction($reference, $txId, $type, $data)
+    public function logTransaction($reference, $txId, $type, $data)
     {
         Lock::acquire(self::LOG_LOCK_KEY);
 
         $now = CarbonImmutable::now();
 
         $db = Db::get();
-        $db->insert(self::TABLE_NAME, [
+        $db->insert(self::LOG_TABLE_NAME, [
             self::COLUMN_TYPE => $type,
             self::COLUMN_TIMESTAMP => $now,
             self::COLUMN_METHOD => $data['_method'],
@@ -112,7 +125,7 @@ class Registry implements IRegistry
      * @param $txid
      * @return array|null
      */
-    public static function findTransactionLogsForTXid($txid)
+    public function findTransactionLogsForTXid($txid)
     {
 
     }
@@ -121,7 +134,7 @@ class Registry implements IRegistry
      * @param $internalReference
      * @return array|null
      */
-    public static function findTransactionLogsForInternalId($internalReference)
+    public function findTransactionLogsForInternalId($internalReference)
     {
 
     }
@@ -130,7 +143,7 @@ class Registry implements IRegistry
      * @param $payoneReference
      * @return array|null
      */
-    public static function findTranslationLogsForPayoneReference($payoneReference)
+    public function findTranslationLogsForPayoneReference($payoneReference)
     {
 
     }

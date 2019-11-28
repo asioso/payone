@@ -62,6 +62,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     const HASH_ALGO_HMAC_SHA384 = 'hmac_sha384';
 
     //supported payment methods
+    const METHOD_PREPAYMENT = "PREPAYMENT";
     const METHOD_SEPA = "SEPA";
     const METHOD_GIROPAY = "GIROPAY";
     const METHOD_PAYPAL = "PAYPAL";
@@ -81,7 +82,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     const PAYMENT_RETURN_STATE_FAILURE = 'failure';
     const PAYMENT_RETURN_STATE_CANCEL = 'cancel';
     const PAYMENT_RETURN_STATE_PENDING = 'pending';
-
 
 
     /**
@@ -277,9 +277,9 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         if (isset($options['data_processor'])) {
             $class = $options['data_processor'];
 
-            $instance  = new $class();
-            if(!$instance instanceof AbstractDataProcessor ){
-                throw new \Exception(sprintf('your DataProcessor must extend  %s', AbstractDataProcessor::class ));
+            $instance = new $class();
+            if (!$instance instanceof AbstractDataProcessor) {
+                throw new \Exception(sprintf('your DataProcessor must extend  %s', AbstractDataProcessor::class));
             }
 
             $this->processor = $instance;
@@ -394,7 +394,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         }
 
 
-
         $paymentData['integrator_name'] = "pimcore";
         $paymentData['integrator_version'] = Version::getVersion();
         $paymentData['solution_name'] = "Asioso";
@@ -413,7 +412,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     public function getShippingConfig(AbstractPaymentInformation &$information, AbstractCart &$cart, $lang = "de")
     {
 
-        $data =  $this->processor->getShippingData($information, $cart);
+        $data = $this->processor->getShippingData($information, $cart);
 
         return $data;
     }
@@ -427,7 +426,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     public function getPersonalConfig(AbstractPaymentInformation &$information, AbstractCart &$cart, $lang = "de")
     {
 
-        $data =  $this->processor->getPersonalData($information, $cart);
+        $data = $this->processor->getPersonalData($information, $cart);
         $data['language'] = $lang;
 
 
@@ -439,11 +438,11 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param array $personalConfig
      * @return array
      */
-    private function getBusinessRelations(array $personalConfig) : array
+    private function getBusinessRelations(array $personalConfig): array
     {
-        if(isset($personalConfig['company']) && !empty($personalConfig['company'])){
+        if (isset($personalConfig['company']) && !empty($personalConfig['company'])) {
             $personalConfig['businessrelation'] = "b2b";
-        }else{
+        } else {
             $personalConfig['businessrelation'] = "b2c";
         }
 
@@ -605,6 +604,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             throw new \Exception('no cart sent');
         }
 
+        $internalID = $config['paymentInfo']->getInternalPaymentId();
         $orderIdent = $this->encodeOrderIdent($config['paymentInfo']->getInternalPaymentId());
         $paymentType = $config['paymentType'] ? $config['paymentType'] : $_REQUEST['paymentType'];
         $method = null;
@@ -620,16 +620,17 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         //setup post fields
         $postFields = $this->setupPostParametersFor($paymentType, $cart, $orderIdent, $config);
 
-
         try {
             $this->logger->info('sending to payone :' . var_export($postFields, true));
             $result = $this->serverToServerRequest($postFields);
+
         } catch (GuzzleException $e) {
             $this->logger->error('payone.network_error : ' . $e->getMessage() . ': ' . var_export($postFields, true));
 
             return array('status' => 'ERROR', 'message' => $e->getMessage(), 'transMessage' => "payone.network_error");
 
         } catch (\Exception $e) {
+
             $this->logger->error('seamless error: ' . $e->getMessage() . ': ' . var_export($postFields, true));
             Logger::error('seamless error: ' . $e->getMessage() . ': ' . var_export($postFields, true));
 
@@ -644,9 +645,15 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         $redirectURL = $result['redirecturl'];
 
         if ($result['status'] == "APPROVED") {
+
+            //commit the order!
+            $checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
+            $checkoutManager->handlePaymentResponseAndCommitOrderPayment($result);
+
             $result['redirecturl'] = $config['successURL'];
             $redirectURL = $result['redirecturl'];
             $result['status'] = 'REDIRECT';
+
         }
 
         if (!$redirectURL) {
@@ -668,7 +675,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param $orderIdent
      * @param $config
      * @return array
-     * @throws \Exception
      */
     private function setupPostParametersFor($paymentType, $cart, $orderIdent, $config)
     {
@@ -676,10 +682,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         /** @var IPrice $price */
         $price = $config['price'] ?: $cart->getPriceCalculator()->getGrandTotal();
 
-        //handle RESPONSE THE PROPER WAY!
-        $commitOrderProcessor = Factory::getInstance()->getCommitOrderProcessor();
-
-        $orderIdent = $this->encodeOrderIdent($config['paymentInfo']->getInternalPaymentId());
+        //$orderIdent = $this->encodeOrderIdent($config['paymentInfo']->getInternalPaymentId());
         $confirmURL = $config['confirmURL'];
 
         if (strpos($confirmURL, '?') === false) {
@@ -691,6 +694,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         $confirmURL .= urlencode($orderIdent);
 
         $parameters = array();
+        $method = null;
         $minConfig = $this->getMinimalDefaultParameters($paymentType);
         $personalConfig = $this->getPersonalConfig($config['paymentInfo'], $cart, $config['language']);
         $shippingData = $this->getShippingConfig($config['paymentInfo'], $cart);
@@ -699,6 +703,21 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         $personalConfig = array_merge($personalConfig, $invoiceData);
 
         switch ($paymentType) {
+
+            case self::METHOD_PREPAYMENT:
+                $parameters = array(
+                    "request" => "preauthorization",
+                    "clearingtype" => "vor",             // sb for Online Bank Transfer
+                    "amount" => $this->getAmount($price),
+                    'currency' => $price->getCurrency()->getShortName(),
+                    "reference" => $orderIdent,
+                    "narrative_text" => $config['orderDescription'] ?: $config['paymentInfo']->getInternalPaymentId(),
+                    "successurl" => $config['successURL'],
+                    "errorurl" => $config['failureURL'],
+                    "backurl" => $config['cancelURL'],
+                );
+                $method = self::METHOD_PREPAYMENT;
+                break;
 
             case self::METHOD_GIROPAY:
 
@@ -724,7 +743,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             // get details!
             case self::METHOD_INVOICE:
-                $personalConfig =  $this->getBusinessRelations($personalConfig);
+                $personalConfig = $this->getBusinessRelations($personalConfig);
                 $method = self::METHOD_INVOICE;
                 $parameters = array(
                     "clearingtype" => "rec", // rec for invoice
@@ -854,7 +873,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
         }
 
-        return array_merge($minConfig, $personalConfig, $parameters);
+        return array_merge($minConfig, $personalConfig, $parameters, ['_method' => $method]);
 
     }
 
@@ -917,6 +936,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             return $status;
         }
 
+        $paymentStatus = IStatus::STATUS_CANCELLED;
 
         if ($this->validateKey($response['key'])) {
             $authorizedData = array_intersect_key($response, $authorizedData);
@@ -929,13 +949,16 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             $price = new Price(Decimal::create($authorizedData['price']), new Currency($authorizedData['currency']));
 
+
+            if ($response['reference'] !== null && (($response['txaction'] == 'appointed') || ($response['txaction'] == 'paid'))) {
+                $paymentStatus = IStatus::STATUS_CLEARED;
+            }
+
             $status = new Status(
                 $orderIdent,
                 $response['reference'],
                 $response['transaction_status'],
-                ($response['reference'] !== null && (($response['txaction'] == 'appointed') || ($response['txaction'] == 'paid')))
-                    ? IStatus::STATUS_AUTHORIZED
-                    : IStatus::STATUS_CANCELLED,
+                $paymentStatus,
                 [
                     'reference' => $response['reference'],
                     'internal' => $orderIdent,
@@ -956,13 +979,23 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         }
 
 
+        if ($orderIdent !== null && (($response['status'] == 'APPROVED'))) {
+            $paymentStatus = IStatus::STATUS_AUTHORIZED;
+            $authorizedData = array_intersect_key($response, $authorizedData);
+            $authorizedData['response'] = var_export($response, true);
+
+            #Logger::info('seamless authorized data' . var_export($authorizedData, true));
+            $this->logger->info('seamless authorized data' . var_export($authorizedData, true));
+
+            $this->setAuthorizedData($authorizedData);
+        }
+
+
         $status = new Status(
             $orderIdent,
             $response['reference'],
             $response['transaction_status'],
-            ($orderIdent !== null && (($response['transaction_status'] == 'PENDING')))
-                ? IStatus::STATUS_PENDING
-                : IStatus::STATUS_CANCELLED,
+            $paymentStatus,
             [
                 'userId' => $response['userid'],
                 'txid' => $response['txid'],
@@ -970,6 +1003,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             ]
         );
+
 
         return $status;
 
@@ -1098,16 +1132,17 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
          *  [userid] => 90737467
          * )
          */
-        $response = Payone::sendRequest($params,"", $this->logger);
+        $response = Payone::sendRequest($params, "", $this->logger);
         //todo handle streamInterface?
         if ($response instanceof Stream) {
             $response = Payone::parseResponse((string)$response->getContents(), $this->logger); // returns all the contents
         }
 
+        $this->registry->logTransaction($params['reference'], $response['txid'], $params['request'], array_merge($response, ['_method' => $params['_method']]));
+
 
         return $response;
     }
-
 
 
     /**
@@ -1164,7 +1199,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     /**
      * @param $orderIdent
      * @return string
-     * @throws \Exception
      */
     protected function encodeOrderIdent($orderIdent)
     {
@@ -1175,8 +1209,9 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             return $external;
         } catch (\Exception $exception) {
-            //
+            $this->logger->error($exception->getMessage());
         }
+
         return $string;
 
     }
@@ -1209,7 +1244,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
         $c = 1; //starts at 1!!!!
         foreach ($cart->getItems() as $cartItem) {
-            $tmpData= $this->processor->getInvoiceData($cartItem);
+            $tmpData = $this->processor->getInvoiceData($cartItem);
 
             $cartData["id[$c]"] = $tmpData['id'];
             //needs to be in cents

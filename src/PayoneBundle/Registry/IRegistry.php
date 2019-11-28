@@ -23,14 +23,14 @@ interface IRegistry
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
-    public static function getInternalByExternalReference($payoneReference);
+    public  function getInternalByExternalReference($payoneReference);
 
     /**
      * @param $internalReference
      * @return string
      * @throws \Exception
      */
-    public static function generateAndStoreExternalReference($internalReference);
+    public  function generateAndStoreExternalReference($internalReference);
 
     /**
      * @param $reference
@@ -38,25 +38,25 @@ interface IRegistry
      * @param $type
      * @param $data
      */
-    public static function logTransaction($reference, $txId, $type ,$data);
+    public  function logTransaction($reference, $txId, $type ,$data);
 
 
     /**
      * @param $txid
      * @return array|null
      */
-    public static function findTransactionLogsForTXid($txid);
+    public  function findTransactionLogsForTXid($txid);
 
     /**
      * @param $internalReference
      * @return array|null
      */
-    public static function findTransactionLogsForInternalId($internalReference);
+    public  function findTransactionLogsForInternalId($internalReference);
 
     /**
      * @param $payoneReference
      * @return array|null
      */
-    public static function findTranslationLogsForPayoneReference($payoneReference);
+    public  function findTranslationLogsForPayoneReference($payoneReference);
 
 }
