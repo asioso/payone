@@ -14,6 +14,7 @@ namespace PayoneBundle;
 use Doctrine\DBAL\Migrations\AbortMigrationException;
 use Doctrine\DBAL\Migrations\Version;
 use Doctrine\DBAL\Schema\Schema;
+use PayoneBundle\Registry\CaptureHandler;
 use PayoneBundle\Registry\Registry;
 use Pimcore\Extension\Bundle\Installer\MigrationInstaller;
 use Pimcore\Model\DataObject\ClassDefinition\Service;
@@ -79,8 +80,9 @@ class Installer extends MigrationInstaller
     {
         $result = \Pimcore\Db::get()->fetchAll('SHOW TABLES LIKE "' . Registry::TABLE_NAME . '"');
         $resultLog = \Pimcore\Db::get()->fetchAll('SHOW TABLES LIKE "' . Registry::LOG_TABLE_NAME . '"');
+        $captureLog =  \Pimcore\Db::get()->fetchAll('SHOW TABLES LIKE "' . CaptureHandler::LOG_TABLE_NAME . '"');
 
-        return !empty($result) && !empty($resultLog) ;
+        return !empty($result) && !empty($resultLog) && !empty($captureLog) ;
     }
 
     public function canBeInstalled()

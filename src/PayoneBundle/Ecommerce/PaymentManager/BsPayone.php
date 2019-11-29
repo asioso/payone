@@ -12,11 +12,11 @@ namespace PayoneBundle\Ecommerce\PaymentManager;
 
 
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Psr7\Stream;
 use PayoneBundle\Model\AbstractDataProcessor;
 use PayoneBundle\PayoneBundle;
 use PayoneBundle\Registry\IRegistry;
 use PayoneBundle\Registry\Registry;
+use PayoneBundle\Service\ServerToServerServiceInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\Cart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
@@ -45,7 +45,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Templating\EngineInterface;
-use PayoneBundle\Ecommerce\PaymentManager\Helper\Payone;
 use PayoneBundle\Ecommerce\IDataProcessor;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\AbstractCart;
 
@@ -199,6 +198,10 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @var bool
      */
     protected $recurringPaymentEnabled = false;
+    /**
+     * @var ServerToServerServiceInterface
+     */
+    private $serverService;
 
 
     /**
@@ -209,9 +212,10 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param FormFactoryInterface $formFactory
      * @param LoggerInterface $logger
      * @param IRegistry $registry
+     * @param ServerToServerServiceInterface $serverService
      * @throws \Exception
      */
-    public function __construct(array $options, EngineInterface $templatingEngine, SessionInterface $session, FormFactoryInterface $formFactory, LoggerInterface $logger, IRegistry $registry)
+    public function __construct(array $options, EngineInterface $templatingEngine, SessionInterface $session, FormFactoryInterface $formFactory, LoggerInterface $logger, IRegistry $registry, ServerToServerServiceInterface $serverService)
     {
         $this->formFactory = $formFactory;
 
@@ -224,6 +228,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
         $this->logger = $logger;
         $this->registry = $registry;
+        $this->serverService = $serverService;
     }
 
     /**
@@ -392,6 +397,12 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             if (isset($this->paymentMethods[$method]['encoding'])) {
                 $paymentData['encoding'] = $this->paymentMethods[$method]['encoding'];
             }
+
+            if (isset($this->paymentMethods[$method]['request_type'])) {
+                //todo inject to actual request
+                //$paymentData['request_type'] = $this->paymentMethods[$method]['request_type'];
+            }
+
         }
 
 
@@ -466,8 +477,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param PriceInterface $price
      * @param array $config
      *
-     * @return mixed - either an url for a link the user has to follow to (e.g. paypal) or
-     *                 an symfony form builder which needs to submitted (e.g. datatrans and wirecard)
+     * @return mixed
      * @throws Exception
      */
     public function initPayment(PriceInterface $price, array $config)
@@ -633,7 +643,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         } catch (\Exception $e) {
 
             $this->logger->error('seamless error: ' . $e->getMessage() . ': ' . var_export($postFields, true));
-            Logger::error('seamless error: ' . $e->getMessage() . ': ' . var_export($postFields, true));
 
             return array('status' => 'ERROR', 'message' => $e->getMessage(), 'transMessage' => 'payment.error.occured', 'customermessage' => $e->getMessage());
         }
@@ -658,9 +667,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         }
 
         if (!$redirectURL) {
-            if (\Pimcore::inDebugMode(DebugMode::LOG)) {
-                Logger::error('seamless result ERROR: ' . var_export($result, true));
-            }
             $this->logger->error('seamless result ERROR: ' . var_export($result, true));
             $result = array('status' => 'ERROR', 'message' => $result['customermessage'], 'customermessage' => $result['customermessage']);
         }
@@ -939,6 +945,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
         $paymentStatus = IStatus::STATUS_CANCELLED;
 
+        //this will throw an exception if there is no such entry in the DB!
         $logData = $this->registry->findTranslationLogsForPayoneReference($response['reference']);
 
         $response['clearingtype'] = $logData[Registry::COLUMN_METHOD];
@@ -982,6 +989,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             return $status;
         }
+
 
         if ($orderIdent !== null && (($response['status'] == 'APPROVED'))) {
             $paymentStatus = IStatus::STATUS_AUTHORIZED;
@@ -1136,16 +1144,8 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
          *  [userid] => 90737467
          * )
          */
-        $response = Payone::sendRequest($params, "", $this->logger);
-        //todo handle streamInterface?
-        if ($response instanceof Stream) {
-            $response = Payone::parseResponse((string)$response->getContents(), $this->logger); // returns all the contents
-        }
 
-        $this->registry->logTransaction($params['reference'], $response['txid'], $params['request'], array_merge($response, ['_method' => $params['_method']]));
-
-
-        return $response;
+        return $this->serverService->serverToServerRequest($params);
     }
 
 
@@ -1293,6 +1293,25 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         return $cartData;
 
 
+    }
+
+    /**
+     * @param $txid
+     * @param $amount
+     * @param $currency
+     * @param array $options
+     * @return array
+     */
+    public function buildCaptureRequest($txid, $amount, $currency, array $options = [] ){
+        $parameters = array(
+            "request" => "capture",
+            "amount" => $amount,
+            'currency' => $currency,
+            "txid" => $txid,
+        );
+        $min = $this->getMinimalDefaultParameters();
+
+        return array_merge($parameters, $min );
     }
 
 
