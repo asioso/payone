@@ -80,5 +80,4 @@ services:
   PayoneBundle\Registry\CaptureHandler:
     arguments:
       $serverService: '@PayoneBundle\Service\ServerToServerServiceInterface'
-      $payone: '@PayoneBundle\Ecommerce\PaymentManager\BsPayone'
 

@@ -71,9 +71,7 @@ class CaptureHandler implements CaptureQueueInterface
             self::COLUMN_DATA => json_encode($options),
 
         ]);
-
         Lock::release(self::LOG_LOCK_KEY);
-
     }
 
     /**
