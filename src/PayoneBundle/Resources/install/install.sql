@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `bundle_payone_transaction_log` (
   `type` VARCHAR(32) NOT NULL,
   `timestamp` TIMESTAMP NOT NULL,
   `method` VARCHAR(32) COLLATE utf8_bin,
-  `payone_reference` VARCHAR(24) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `payone_reference` VARCHAR(24) COLLATE utf8_bin DEFAULT '',
   `txid` VARCHAR(32) COLLATE utf8_bin,
   `data` TEXT COLLATE utf8_bin,
    PRIMARY KEY (`id`)

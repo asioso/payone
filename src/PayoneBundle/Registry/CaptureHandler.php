@@ -14,6 +14,7 @@ namespace PayoneBundle\Registry;
 use Carbon\CarbonImmutable;
 use PayoneBundle\Ecommerce\PaymentManager\BsPayone;
 use PayoneBundle\Service\ServerToServerServiceInterface;
+use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
 use Pimcore\Db;
 use Pimcore\Model\Tool\Lock;
 
@@ -21,7 +22,7 @@ class CaptureHandler implements CaptureQueueInterface
 {
     const LOG_TABLE_NAME = "bundle_payone_capture_log";
     const COLUMN_TIMESTAMP = "timestamp";
-    const COLUMN_PAYONE_REFERENCE = "reference";
+    const COLUMN_PAYONE_REFERENCE = "payone_reference";
     const COLUMN_TXID = "txid";
     const COLUMN_AMOUNT = "amount";
     const COLUMN_CURRENCY = "currency";
@@ -31,26 +32,18 @@ class CaptureHandler implements CaptureQueueInterface
     const LOG_LOCK_KEY = 'payone_capture_log';
 
     /**
-     * @var array
-     */
-    private $options;
-    /**
      * @var ServerToServerServiceInterface
      */
     private $serverService;
-    /**
-     * @var string $profile
-     */
-    private $profile;
     /**
      * @var BsPayone
      */
     private $payone;
 
-    public function __construct( ServerToServerServiceInterface $serverService, BsPayone $payone)
+    public function __construct( ServerToServerServiceInterface $serverService)
     {
         $this->serverService = $serverService;
-        $this->payone = $payone;
+        $this->payone = Factory::getInstance()->getPaymentManager()->getProvider('payone');
     }
 
     /**
@@ -80,7 +73,6 @@ class CaptureHandler implements CaptureQueueInterface
         ]);
 
         Lock::release(self::LOG_LOCK_KEY);
-
 
     }
 
