@@ -62,14 +62,15 @@ class CaptureListener implements EventSubscriberInterface
     {
         if($event->getRequestParameters()['request'] == 'preauthorization'){
             $this->captureQueue->addCapture(
-                $event->getResponseParameters('txid'),
-                $event->getRequestParameters('reference'),
-                $event->getRequestParameters('amount'),
-                $event->getRequestParameters('currency'),
+                $event->getResponseParameters()['txid'],
+                $event->getRequestParameters()['reference'],
+                $event->getRequestParameters()['amount'],
+                $event->getRequestParameters()['currency'],
                 $event->getRequestParameters()
                 );
 
-            $this->captureQueue->resolveCapture($event->getResponseParameters('txid'));
+            $this->captureQueue->resolveCapture($event->getResponseParameters()['txid']);
+
 
         }
 
