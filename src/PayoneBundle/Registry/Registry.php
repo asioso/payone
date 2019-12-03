@@ -161,7 +161,7 @@ class Registry implements IRegistry
 
         $db = Db::get();
         $result = $db->fetchRow(
-            "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN__PAYONE_REFERENCE . "` = ? AND (`method` = 'preauthorization' OR `method` = 'authorization') ",
+            "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN__PAYONE_REFERENCE . "` = ? AND (`type` = 'preauthorization' OR `type` = 'authorization') ",
             [$payoneReference]
         );
 
