@@ -59,6 +59,6 @@ interface IRegistry
      * @return array|mixed|null
      * @throws \Exception
      */
-    public  function findTranslationLogsForPayoneReference($payoneReference);
+    public  function findTransactionLogsForPayoneReference($payoneReference);
 
 }

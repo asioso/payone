@@ -47,13 +47,13 @@ class CaptureHandler implements CaptureQueueInterface
     }
 
     /**
-     * @param $txid
-     * @param $reference
-     * @param $amount
-     * @param $currency
+     * @param string $txid
+     * @param string $reference
+     * @param string $amount
+     * @param string $currency
      * @param array $options
      */
-    public function addCapture($txid, $reference, $amount, $currency, array $options): void
+    public function addCapture(string $txid,string  $reference,string  $amount,string  $currency, array $options): void
     {
 
         Lock::acquire(self::LOG_LOCK_KEY);
@@ -93,9 +93,12 @@ class CaptureHandler implements CaptureQueueInterface
         }
 
         Lock::acquire(self::LOG_LOCK_KEY);
+        $now = CarbonImmutable::now();
         //build request and send it! updated processed to current timestamp
         $params = $this->payone->buildCaptureRequest($txid, $result[self::COLUMN_AMOUNT], $result[self::COLUMN_CURRENCY], json_decode($result[self::COLUMN_DATA], true));
         $this->serverService->serverToServerRequest($params);
+
+        $db->updateWhere(self::LOG_TABLE_NAME, [self::COLUMN_PROCESSED=> $now ], "id = ". $result['id'] );
 
         Lock::release(self::LOG_LOCK_KEY);
     }

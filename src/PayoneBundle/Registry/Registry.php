@@ -156,12 +156,12 @@ class Registry implements IRegistry
      * @return array|mixed|null
      * @throws \Exception
      */
-    public function findTranslationLogsForPayoneReference($payoneReference)
+    public function findTransactionLogsForPayoneReference($payoneReference)
     {
 
         $db = Db::get();
         $result = $db->fetchRow(
-            "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN__PAYONE_REFERENCE . "` = ?",
+            "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN__PAYONE_REFERENCE . "` = ? AND (`method` = 'preauthorization' OR `method` = 'authorization') ",
             [$payoneReference]
         );
 

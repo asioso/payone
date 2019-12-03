@@ -20,12 +20,13 @@ use PayoneBundle\Service\ServerToServerServiceInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\Cart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\CartManager\ICart;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
+use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractOrder;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractPaymentInformation;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\Currency;
 use Pimcore\Bundle\EcommerceFrameworkBundle\OrderManager\OrderAgentInterface;
-use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\IStatus;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Payment\AbstractPayment;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\Status;
+use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\StatusInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\StartPaymentRequest\AbstractRequest;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\StartPaymentResponse\SnippetResponse;
 use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\V7\Payment\StartPaymentResponse\StartPaymentResponseInterface;
@@ -888,7 +889,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     /**
      * @param mixed $response
      *
-     * @return IStatus
+     * @return StatusInterface
      *
      * @throws \Exception
      */
@@ -931,7 +932,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
                 $orderIdent,
                 $response['reference'],
                 $response['errormessage'],
-                IStatus::STATUS_CANCELLED,
+                StatusInterface::STATUS_CANCELLED,
                 [
                     'response' => json_encode($response)
                 ]
@@ -943,10 +944,10 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             return $status;
         }
 
-        $paymentStatus = IStatus::STATUS_CANCELLED;
+        $paymentStatus = StatusInterface::STATUS_CANCELLED;
 
         //this will throw an exception if there is no such entry in the DB!
-        $logData = $this->registry->findTranslationLogsForPayoneReference($response['reference']);
+        $logData = $this->registry->findTransactionLogsForPayoneReference($response['reference']);
 
         $response['clearingtype'] = $logData[Registry::COLUMN_METHOD];
 
@@ -961,9 +962,12 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             $price = new Price(Decimal::create($authorizedData['price']), new Currency($authorizedData['currency']));
 
+            $this->registry->logTransaction($response['reference'], $response['txid'],$response['txaction'], $response);
 
-            if ($response['reference'] !== null && (($response['txaction'] == 'appointed') || ($response['txaction'] == 'paid'))) {
-                $paymentStatus = IStatus::STATUS_CLEARED;
+            if ($response['reference'] !== null && (($response['txaction'] == 'appointed') )) {
+                $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
+            }else if ($response['reference'] !== null && (($response['txaction'] == 'paid'))) {
+                $paymentStatus = StatusInterface::STATUS_CLEARED;
             }
 
             $status = new Status(
@@ -992,7 +996,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
 
         if ($orderIdent !== null && (($response['status'] == 'APPROVED'))) {
-            $paymentStatus = IStatus::STATUS_AUTHORIZED;
+            $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
             $authorizedData = array_intersect_key($response, $authorizedData);
             $authorizedData['response'] = var_export($response, true);
 
@@ -1001,7 +1005,11 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             $this->setAuthorizedData($authorizedData);
         }
-
+        else {
+            // failed
+            $paymentStatus = AbstractOrder::ORDER_STATE_ABORTED;
+            $message = $response['errorDetail'];
+        }
 
         $status = new Status(
             $orderIdent,
@@ -1012,7 +1020,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
                 'userId' => $response['userid'],
                 'txid' => $response['txid'],
                 'response' => print_r($response, true),
-
             ]
         );
 
@@ -1047,7 +1054,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param IPrice $price
      * @param string $reference
      *
-     * @return IStatus
+     * @return StatusInterface
      */
     public function executeDebit(PriceInterface $price = null, $reference = null)
     {
@@ -1061,7 +1068,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param string $reference
      * @param $transactionId
      *
-     * @return IStatus
+     * @return StatusInterface
      */
     public function executeCredit(PriceInterface $price, $reference, $transactionId)
     {

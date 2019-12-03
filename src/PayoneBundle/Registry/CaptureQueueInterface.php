@@ -15,13 +15,13 @@ interface CaptureQueueInterface
 {
 
     /**
-     * @param $txid
-     * @param $reference
-     * @param $amount
-     * @param $currency
+     * @param string $txid
+     * @param string $reference
+     * @param string $amount
+     * @param string $currency
      * @param array $options
      */
-    public function addCapture($txid, $reference, $amount, $currency, array $options): void;
+    public function addCapture(string $txid,string  $reference,string  $amount,string  $currency, array $options): void;
 
     /**
      * @param $txid
