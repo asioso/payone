@@ -43,7 +43,7 @@ class CaptureHandler implements CaptureQueueInterface
     public function __construct( ServerToServerServiceInterface $serverService)
     {
         $this->serverService = $serverService;
-        $this->payone = Factory::getInstance()->getPaymentManager()->getProvider('payone');
+        $this->payone = Factory::getInstance()->getPaymentManager()->getProvider('bspayone');
     }
 
     /**
