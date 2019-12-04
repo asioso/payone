@@ -68,6 +68,10 @@ services:
     arguments:
       $registry: '@PayoneBundle\Registry\IRegistry'
 
+  PayoneBundle\EventListener\PaymentUpdateSubscriber:
+    tags:
+      - { name: kernel.event_subscriber }
+
   #Events
   PayoneBundle\EventListener\CaptureListener:
     tags:

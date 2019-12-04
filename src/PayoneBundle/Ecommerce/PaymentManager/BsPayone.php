@@ -205,6 +205,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     private $serverService;
 
 
+
     /**
      * BsPayone constructor.
      * @param array $options
@@ -996,7 +997,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
 
         if ($orderIdent !== null && (($response['status'] == 'APPROVED'))) {
-            $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
+            $paymentStatus = StatusInterface::STATUS_PENDING;
             $authorizedData = array_intersect_key($response, $authorizedData);
             $authorizedData['response'] = var_export($response, true);
 

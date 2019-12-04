@@ -18,7 +18,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\Exception\UnsupportedException;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
 use Pimcore\Document\Tag\Exception\NotFoundException;
 use Pimcore\Logger;
-use Pimcore\Tool;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -66,13 +65,27 @@ class BsPayoneController extends AbstractCartAware
         Logger::info('##url (payone payment confirmed): '.$_SERVER['REQUEST_URI'] . '&'. http_build_query($params));
 
         $commitOrderProcessor = Factory::getInstance()->getCommitOrderProcessor();
+
+        /**
+         * @var $paymentProvider BsPayone
+         */
         $paymentProvider = Factory::getInstance()->getPaymentManager()->getProvider('payone');
 
         if ($committedOrder = $commitOrderProcessor->committedOrderWithSamePaymentExists($params, $paymentProvider)) {
             Logger::info('Order with same payment is already committed, doing nothing. OrderId is ' . $committedOrder->getId());
         } else {
-            $order = $commitOrderProcessor->handlePaymentResponseAndCommitOrderPayment($params, $paymentProvider);
-            Logger::info('Finished server side call. OrderId is ' . $order->getId());
+
+            //order is already commited, just update the payment Status
+            $paymentStatus = $paymentProvider->handleResponse($params );
+            $orderManager = Factory::getInstance()->getOrderManager();
+            $order = $orderManager->getOrderByPaymentStatus($paymentStatus);
+
+            $orderAgent = Factory::getInstance()->getOrderManager()->createOrderAgent($order);
+            //mails should get handled by the processor implementing PayoneCommitOrderProcessorInterface
+            $orderAgent->updatePayment($paymentStatus);
+
+            //$this->eventDispatcher->dispatch( PayoneEvents::PAYONE_ORDER_UPDATE, new PayoneOrderUpdateEvent($paymentStatus, $order) );
+
         }
 
 
