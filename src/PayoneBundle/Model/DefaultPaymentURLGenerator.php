@@ -131,4 +131,17 @@ class DefaultPaymentURLGenerator implements IPaymentURLGenerator
 
         return $schema . $this->generateUrl('payone', ['action' => 'completed', 'controller' => 'checkout', 'id' => $paymentInformation->getObject()->getId(), 'prefix' => $language]);
     }
+
+    /**
+     * @param AbstractPaymentInformation $paymentInformation
+     * @param array|null $config
+     * @return string
+     */
+    public function getPollingURL(AbstractPaymentInformation $paymentInformation, array $config = null): string
+    {
+        $schema = $config['schemaAndHost'];
+        $language = $config['language'];
+
+        return $schema . $this->generateUrl('payone', ['action' => 'poll-reference-ready']);
+    }
 }

@@ -61,4 +61,9 @@ interface IRegistry
      */
     public  function findTransactionLogsForPayoneReference($payoneReference);
 
+    /**
+     * @param $payoneReference
+     * @return bool
+     */
+    public function findTransactionAppointedForPayoneReference($payoneReference);
 }

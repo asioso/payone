@@ -173,5 +173,27 @@ class Registry implements IRegistry
         return $result;
     }
 
+    /**
+     * @param $payoneReference
+     * @return array|mixed|null
+     * @throws \Exception
+     */
+    public function findTransactionAppointedForPayoneReference($payoneReference)
+    {
+
+        $db = Db::get();
+        $result = $db->fetchRow(
+            "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN__PAYONE_REFERENCE . "` = ? AND `type` = 'appointed' ",
+            [$payoneReference]
+        );
+
+        if (!$result) {
+            throw new \Exception('reference does not exist');
+        }
+
+
+        return $result != false ;
+    }
+
 
 }

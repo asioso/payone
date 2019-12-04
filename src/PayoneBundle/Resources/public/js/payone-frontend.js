@@ -63,6 +63,21 @@ var SeamlessHandler = {
 
     },
 
+    poll: function (url, redirect) {
+        var that = this;
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function(data) {
+                console.log(data);
+
+            },
+            dataType: "json",
+            complete: setTimeout(function() {that.poll(url, redirect)}, 500),
+            timeout: 500
+        })
+    },
+
     startPayment: function (container, serializedForm) {
         var that = this;
         $('.payone-error').hide();
@@ -72,11 +87,15 @@ var SeamlessHandler = {
 
         that.addToPendingWork( $.get(container.data('generate-redirect-url') + '?' + serializedForm)
             .then((function (response) {
-                console.log(response);
-                console.log('right one');
+
                 top.window.removeEventListener("beforeunload", that.unloadListener);
                 if (response.status === "REDIRECT" && response.url) {
-                    top.window.location.href = response.url;
+
+                    if(response.poll){
+                        that.poll(response.poll, response.url);
+                    }else{
+                        top.window.location.href = response.url;
+                    }
                 }
 
                 if (response.status === "ERROR") {

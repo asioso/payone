@@ -659,12 +659,15 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         if ($result['status'] == "APPROVED") {
 
             //commit the order!
-            $checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
-            $checkoutManager->handlePaymentResponseAndCommitOrderPayment($result);
+            #$checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
+            #$checkoutManager->handlePaymentResponseAndCommitOrderPayment($result);
 
             $result['redirecturl'] = $config['successURL'];
             $redirectURL = $result['redirecturl'];
             $result['status'] = 'REDIRECT';
+            if($paymentType == "PREPAYMENT"){
+                $result['poll'] = $config['pollingURL']."?ref=". $result['reference'];
+            }
 
         }
 

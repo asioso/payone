@@ -13,6 +13,7 @@ namespace PayoneBundle\Controller;
 use AppBundle\Controller\AbstractCartAware;
 
 use PayoneBundle\Ecommerce\PaymentManager\BsPayone;
+use PayoneBundle\Registry\IRegistry;
 use Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Exception\UnsupportedException;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Factory;
@@ -32,14 +33,19 @@ class BsPayoneController extends AbstractCartAware
      * @var \PayoneBundle\Model\IPaymentURLGenerator
      */
     private $generator;
+    /**
+     * @var IRegistry
+     */
+    private $registry;
 
     /**
      * BsPayoneController constructor.
      * @param \PayoneBundle\Model\IPaymentURLGenerator $generator
      */
-    public function __construct(\PayoneBundle\Model\IPaymentURLGenerator $generator)
+    public function __construct(\PayoneBundle\Model\IPaymentURLGenerator $generator, IRegistry $registry)
     {
         $this->generator = $generator;
+        $this->registry = $registry;
     }
 
     /**
@@ -75,16 +81,22 @@ class BsPayoneController extends AbstractCartAware
             Logger::info('Order with same payment is already committed, doing nothing. OrderId is ' . $committedOrder->getId());
         } else {
 
-            //order is already commited, just update the payment Status
-            $paymentStatus = $paymentProvider->handleResponse($params );
-            $orderManager = Factory::getInstance()->getOrderManager();
-            $order = $orderManager->getOrderByPaymentStatus($paymentStatus);
+            try{
 
-            $orderAgent = Factory::getInstance()->getOrderManager()->createOrderAgent($order);
-            //mails should get handled by the processor implementing PayoneCommitOrderProcessorInterface
-            $orderAgent->updatePayment($paymentStatus);
+                $commitOrderProcessor->handlePaymentResponseAndCommitOrderPayment($params);
 
-            //$this->eventDispatcher->dispatch( PayoneEvents::PAYONE_ORDER_UPDATE, new PayoneOrderUpdateEvent($paymentStatus, $order) );
+            }catch(UnsupportedException $e){
+
+                //order is already committed, just update the payment Status
+                $paymentStatus = $paymentProvider->handleResponse($params );
+                $orderManager = Factory::getInstance()->getOrderManager();
+                $order = $orderManager->getOrderByPaymentStatus($paymentStatus);
+
+                $orderAgent = Factory::getInstance()->getOrderManager()->createOrderAgent($order);
+                //mails should get handled by the processor implementing PayoneCommitOrderProcessorInterface
+                $orderAgent->updatePayment($paymentStatus);
+            }
+
 
         }
 
@@ -172,6 +184,7 @@ class BsPayoneController extends AbstractCartAware
                 'pendingURL' => $this->generator->getPendingUrl($paymentInformation, $urlConfig),
                 'confirmURL' => $this->generator->getConfirmUrl($paymentInformation, $urlConfig),
                 'completedURL' => $this->generator->getCompletedUrl($paymentInformation, $urlConfig),
+                'pollingURL' => $this->generator->getPollingURL($paymentInformation, $urlConfig),
                 'paymentInfo' => $paymentInformation,
                 'paymentType' => $paymentType,
                 'cart' => $this->getCart(),
@@ -270,6 +283,16 @@ class BsPayoneController extends AbstractCartAware
             ];
         }
         return $this->json($data);
+    }
+
+
+    public function pollReferenceReadyAction(Request $request)
+    {
+        if($request->isXmlHttpRequest()){
+            $data = array('ready' => $this->registry->findTransactionAppointedForPayoneReference($request->get('ref')));
+            return new JsonResponse($data);
+        }
+
     }
 
 }

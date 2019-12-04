@@ -64,4 +64,10 @@ interface IPaymentURLGenerator
      */
     public function getCompletedUrl(AbstractPaymentInformation $paymentInformation, array $config = null): string;
 
+    /**
+     * @param AbstractPaymentInformation $paymentInformation
+     * @param array|null $config
+     * @return string
+     */
+    public function getPollingURL(AbstractPaymentInformation $paymentInformation, array $config = null): string;
 }

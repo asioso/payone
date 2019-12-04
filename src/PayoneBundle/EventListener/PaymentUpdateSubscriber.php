@@ -39,7 +39,6 @@ class PaymentUpdateSubscriber implements EventSubscriberInterface
              */
             $paymentStatus = $event->getArgument('status');
             $processor = \Pimcore\Bundle\EcommerceFrameworkBundle\Factory::getInstance()->getCommitOrderProcessor();
-
             if($paymentStatus->getStatus() == StatusInterface::STATUS_AUTHORIZED){
                 if($processor instanceof PayoneCommitOrderProcessorInterface){
                     $processor->processOrderOnAuthorized($agent->getOrder());
