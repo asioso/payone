@@ -82,8 +82,8 @@ class BsPayoneController extends AbstractCartAware
         } else {
 
             try{
-
-                $commitOrderProcessor->handlePaymentResponseAndCommitOrderPayment($params);
+                $order =  $commitOrderProcessor->handlePaymentResponseAndCommitOrderPayment($params,$paymentProvider);
+                Logger::info('Finished server side call. OrderId is ' . $order->getId());
 
             }catch(UnsupportedException $e){
 
