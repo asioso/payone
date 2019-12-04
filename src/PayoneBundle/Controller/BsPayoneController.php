@@ -69,7 +69,7 @@ class BsPayoneController extends AbstractCartAware
         /**
          * @var $paymentProvider BsPayone
          */
-        $paymentProvider = Factory::getInstance()->getPaymentManager()->getProvider('payone');
+        $paymentProvider = Factory::getInstance()->getPaymentManager()->getProvider('bspayone');
 
         if ($committedOrder = $commitOrderProcessor->committedOrderWithSamePaymentExists($params, $paymentProvider)) {
             Logger::info('Order with same payment is already committed, doing nothing. OrderId is ' . $committedOrder->getId());
