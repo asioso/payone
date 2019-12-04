@@ -1,21 +1,19 @@
-
-
 var SeamlessHandler = {
     pendingOps: null,
-    unloadListener : null,
+    unloadListener: null,
 
     init: function () {
         this.initEvents();
         this.pendingOps = new Set();
         var message = SeamlessHandler.popErrorMessage();
         if ('undefined' !== typeof message && message !== null) {
-            $('#errormessage').append("<div class=\"alert alert-danger\">" + "<strong>"+message+"</strong>" + "</div>");
+            $('#errormessage').append("<div class=\"alert alert-danger\">" + "<strong>" + message + "</strong>" + "</div>");
         }
     },
 
     initEvents: function () {
         var that = this;
-        that.unloadListener = function(event){
+        that.unloadListener = function (event) {
             if (that.pendingOps.size) {
                 event.returnValue = 'There is pending work. Sure you want to leave?';
             }
@@ -35,15 +33,15 @@ var SeamlessHandler = {
 
         top.window.addEventListener('beforeunload', that.unloadListener);
 
-        $('.panel-default').click(function(){
+        $('.panel-default').click(function () {
             $('#errormessage').empty();
         });
 
 
     },
 
-    checkMandate: function(container, serializedForm){
-        return new Promise(function(resolve, reject){
+    checkMandate: function (container, serializedForm) {
+        return new Promise(function (resolve, reject) {
 
             $.get(container.data('check-url') + '?' + serializedForm)
                 .then((function (response) {
@@ -52,9 +50,9 @@ var SeamlessHandler = {
         });
     },
 
-    addToPendingWork: function(promise) {
-        var that= this;
-        return new Promise(function(resolve, reject){
+    addToPendingWork: function (promise) {
+        var that = this;
+        return new Promise(function (resolve, reject) {
             that.pendingOps.add(promise);
             var cleanup = () => that.pendingOps.delete(promise);
             promise.then(cleanup).catch(cleanup);
@@ -68,13 +66,15 @@ var SeamlessHandler = {
         $.ajax({
             url: url,
             type: "GET",
-            success: function(data) {
-                if(data.ready === true){
+            success: function (data) {
+                if (data.ready === true) {
                     top.window.location.href = redirect;
                 }
             },
             dataType: "json",
-            complete: setTimeout(function() {that.poll(url, redirect)}, 700),
+            complete: setTimeout(function () {
+                that.poll(url, redirect)
+            }, 700),
             timeout: 700
         })
     },
@@ -86,17 +86,21 @@ var SeamlessHandler = {
         container.html(SeamlessHandler.getLoadingDiv());
         SeamlessHandler.scrollTo(container);
 
-        that.addToPendingWork( $.get(container.data('generate-redirect-url') + '?' + serializedForm)
+        that.addToPendingWork($.get(container.data('generate-redirect-url') + '?' + serializedForm)
             .then((function (response) {
                 top.window.removeEventListener("beforeunload", that.unloadListener);
 
                 if (response.status === "REDIRECT" && response.url) {
 
+                    top.window.location.href = response.url;
+                    /*
                     if(response.poll){
                         that.poll(response.poll, response.url);
                     }else{
-                        top.window.location.href = response.url;
+
                     }
+                    */
+
                 }
 
                 if (response.status === "ERROR") {
@@ -118,34 +122,31 @@ var SeamlessHandler = {
             scrollTop: element.offset().top - 100
         }, 500);
     },
-    pushErrorMessage: function(message){
+    pushErrorMessage: function (message) {
         if (SeamlessHandler.storageAvailable('sessionStorage')) {
             sessionStorage.setItem("neyer.error", message);
-        }
-        else {
+        } else {
             // Too bad, no localStorage for us
         }
     },
-    popErrorMessage: function(){
+    popErrorMessage: function () {
         if (SeamlessHandler.storageAvailable('sessionStorage')) {
             let value = sessionStorage.getItem("neyer.error");
             sessionStorage.removeItem("neyer.error");
             return value;
-        }
-        else {
+        } else {
             // Too bad, no localStorage for us
         }
         return null;
     },
-    storageAvailable:function (type) {
+    storageAvailable: function (type) {
         try {
             let storage = window[type],
                 x = '__storage_test__';
             storage.setItem(x, x);
             storage.removeItem(x);
             return true;
-        }
-        catch(e) {
+        } catch (e) {
             return e instanceof DOMException && (
                     // everything except Firefox
                 e.code === 22 ||

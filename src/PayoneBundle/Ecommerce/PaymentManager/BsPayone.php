@@ -636,6 +636,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         try {
             $this->logger->info('sending to payone :' . var_export($postFields, true));
             $result = $this->serverToServerRequest($postFields);
+            $this->registry->logTransaction($postFields['reference'], $result['txid'],$result);
 
         } catch (GuzzleException $e) {
             $this->logger->error('payone.network_error : ' . $e->getMessage() . ': ' . var_export($postFields, true));
@@ -658,9 +659,15 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
         if ($result['status'] == "APPROVED") {
 
-            //commit the order!
-            #$checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
-            #$checkoutManager->handlePaymentResponseAndCommitOrderPayment($result);
+
+            /*
+             //commit the order!
+            if($paymentType== "PREPAYMENT"){
+                $checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
+                $checkoutManager->handlePaymentResponseAndCommitOrderPayment($result);
+            }
+            */
+
 
             $result['redirecturl'] = $config['successURL'];
             $redirectURL = $result['redirecturl'];
