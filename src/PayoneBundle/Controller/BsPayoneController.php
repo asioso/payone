@@ -206,7 +206,7 @@ class BsPayoneController extends AbstractCartAware
                 $response = $payment->getInitPaymentRedirectUrl($config);
 
                 if(isset($response['redirecturl'])){
-                    return $this->json(['url' => $response['redirecturl'], 'status' => $response['status'], $response['poll'] ]);
+                    return $this->json(['url' => $response['redirecturl'], 'status' => $response['status'], 'poll' => $response['poll'] ]);
                 }
 
                 if(isset($response['status']) && $response['status']== "ERROR"){

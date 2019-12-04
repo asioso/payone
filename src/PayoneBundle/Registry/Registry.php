@@ -169,7 +169,6 @@ class Registry implements IRegistry
             throw new \Exception('reference does not exist');
         }
 
-
         return $result;
     }
 
