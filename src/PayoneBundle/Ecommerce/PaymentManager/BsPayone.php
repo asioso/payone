@@ -636,7 +636,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         try {
             $this->logger->info('sending to payone :' . var_export($postFields, true));
             $result = $this->serverToServerRequest($postFields);
-            $this->registry->logTransaction($postFields['reference'], $result['txid'],$result);
+            $this->registry->logTransaction($postFields['reference'], $result['txid'], $postFields['request'], $result);
 
         } catch (GuzzleException $e) {
             $this->logger->error('payone.network_error : ' . $e->getMessage() . ': ' . var_export($postFields, true));
