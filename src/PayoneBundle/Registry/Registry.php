@@ -187,10 +187,6 @@ class Registry implements IRegistry
             [$payoneReference]
         );
 
-        if (!$result) {
-            throw new \Exception('reference does not exist');
-        }
-
 
         return $result != false ;
     }

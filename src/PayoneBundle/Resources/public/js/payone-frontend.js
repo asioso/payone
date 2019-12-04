@@ -69,12 +69,13 @@ var SeamlessHandler = {
             url: url,
             type: "GET",
             success: function(data) {
-                console.log(data);
-
+                if(data.ready === true){
+                    top.window.location.href = redirect;
+                }
             },
             dataType: "json",
-            complete: setTimeout(function() {that.poll(url, redirect)}, 500),
-            timeout: 500
+            complete: setTimeout(function() {that.poll(url, redirect)}, 700),
+            timeout: 700
         })
     },
 
@@ -87,8 +88,8 @@ var SeamlessHandler = {
 
         that.addToPendingWork( $.get(container.data('generate-redirect-url') + '?' + serializedForm)
             .then((function (response) {
-
                 top.window.removeEventListener("beforeunload", that.unloadListener);
+
                 if (response.status === "REDIRECT" && response.url) {
 
                     if(response.poll){
