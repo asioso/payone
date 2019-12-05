@@ -973,7 +973,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             $price = new Price(Decimal::create($authorizedData['price']), new Currency($authorizedData['currency']));
 
-            $this->registry->logTransaction($response['reference'], $response['txid'],$response['txaction'], $response);
+            //$this->registry->logTransaction($response['reference'], $response['txid'],$response['txaction'], $response);
 
             if ($response['reference'] !== null && (($response['txaction'] == 'appointed') )) {
                 $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
