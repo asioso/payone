@@ -1018,7 +1018,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         }
         else {
             // failed
-            $paymentStatus = AbstractOrder::ORDER_STATE_ABORTED;
+            $paymentStatus = AbstractOrder::ORDER_STATE_PAYMENT_PENDING;
             $message = $response['errorDetail'];
         }
 
