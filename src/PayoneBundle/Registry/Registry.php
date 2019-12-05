@@ -190,5 +190,20 @@ class Registry implements IRegistry
         return $result != false ;
     }
 
+    public static function getBankDataForReference($payoneReference){
+        $db = Db::get();
+        $result = $db->fetchRow(
+            "SELECT data FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN__PAYONE_REFERENCE . "` = ? AND `type` = 'preauthorization' ",
+            [$payoneReference]
+        );
+
+        if($result){
+            return json_decode( $result['data'], true);
+        }
+
+        return null;
+
+    }
+
 
 }
