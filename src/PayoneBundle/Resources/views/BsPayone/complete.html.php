@@ -24,7 +24,7 @@ $state = $this->getParam('state');
 
 <script type="text/javascript">
     <?php if($isCommited) {?>
-    window.open('<?= $_SERVER["REQUEST_SCHEME"] ?>://<?=$_SERVER['HTTP_HOST']?><?= $this->pimcoreUrl(['action' => 'completed', 'controller' => 'checkout', 'id' => $this->order->getId(),'prefix'=>$this->language], 'action', true)?>', '_top');
+    window.open('<?= $_SERVER["REQUEST_SCHEME"] ?>://<?=$_SERVER['HTTP_HOST']?><?= $this->pimcoreUrl(['action' => 'completed', 'controller' => 'checkout', 'id' => base64_encode($this->order->getId()),'prefix'=>$this->language], 'action', true)?>', '_top');
     <?php } ?>
 </script>
 

@@ -69,7 +69,8 @@ class CaptureListener implements EventSubscriberInterface
                 $event->getRequestParameters()
                 );
 
-            $this->captureQueue->resolveCapture($event->getResponseParameters()['txid']);
+            //do not resolve now.
+            //$this->captureQueue->resolveCapture($event->getResponseParameters()['txid']);
 
 
         }
