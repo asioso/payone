@@ -11,6 +11,9 @@
 namespace PayoneBundle\Registry;
 
 
+use PayoneBundle\Ecommerce\PaymentManager\BsPayone;
+use Pimcore\Bundle\EcommerceFrameworkBundle\PaymentManager\PaymentManagerInterface;
+
 interface CaptureQueueInterface
 {
 
@@ -25,8 +28,9 @@ interface CaptureQueueInterface
 
     /**
      * @param $txid
+     * @param BsPayone $payone
      * @return mixed
      */
-    public function resolveCapture($txid);
+    public function resolveCapture($txid, BsPayone $payone);
 
 }

@@ -208,7 +208,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param ServerToServerServiceInterface $serverService
      * @throws \Exception
      */
-    public function __construct(array $options, EngineInterface $templatingEngine, LoggerInterface $logger, IRegistry $registry, ServerToServerServiceInterface $serverService)
+    public function __construct(array $options, EngineInterface $templatingEngine, LoggerInterface $logger, IRegistry $registry, ServerToServerServiceInterface $serverService, CaptureQueueInterface $captureQueue)
     {
 
         $this->processOptions(
@@ -220,6 +220,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         $this->logger = $logger;
         $this->registry = $registry;
         $this->serverService = $serverService;
+        $this->captureQueue = $captureQueue;
     }
 
     /**
@@ -963,7 +964,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             } else if ($response['reference'] !== null && (($response['txaction'] == 'paid'))) {
                 $paymentStatus = StatusInterface::STATUS_CLEARED;
                 // resolve capture
-                //$this->captureQueue->resolveCapture($response['txid']);
+                $this->captureQueue->resolveCapture($response['txid'], $this);
             } else if ($response['reference'] !== null && (($response['txaction'] == 'capture'))) {
                 $paymentStatus = StatusInterface::STATUS_CLEARED;
             } else if ($response['reference'] !== null && (($response['txaction'] == 'cancelation'))) {

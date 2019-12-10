@@ -76,12 +76,14 @@ class CaptureHandler implements CaptureQueueInterface
 
     /**
      * @param $txid
+     * @param BsPayone $payone
+     * @return mixed
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function resolveCapture($txid)
+    public function resolveCapture($txid, BsPayone $payone)
     {
 
-        $this->payone = Factory::getInstance()->getPaymentManager()->getProvider('bspayone');
         $db = Db::get();
         $result = $db->fetchRow(
             "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN_TXID . "` = ?",
@@ -93,7 +95,7 @@ class CaptureHandler implements CaptureQueueInterface
             Lock::acquire(self::LOG_LOCK_KEY);
             $now = CarbonImmutable::now();
             //build request and send it! updated processed to current timestamp
-            $params = $this->payone->buildCaptureRequest($txid, $result[self::COLUMN_AMOUNT], $result[self::COLUMN_CURRENCY], json_decode($result[self::COLUMN_DATA], true));
+            $params = $payone->buildCaptureRequest($txid, $result[self::COLUMN_AMOUNT], $result[self::COLUMN_CURRENCY], json_decode($result[self::COLUMN_DATA], true));
             $this->serverService->serverToServerRequest($params);
 
             $db->updateWhere(self::LOG_TABLE_NAME, [self::COLUMN_PROCESSED=> $now ], "id = ". $result['id'] );
