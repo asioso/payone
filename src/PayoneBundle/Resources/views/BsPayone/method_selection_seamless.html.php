@@ -51,6 +51,12 @@
     <a id="mandateCancel" class="btn btn-primary mandate-cancel"><?= $this->translate('payment.payone-seamless.mandate.cancel') ?></a>
 </div>
 
+<?php if(getenv('PAYONE_MODE') == "test"){?>
+    <div>
+        <h1>TEST MODE </h1>
+    </div>
+<?php } ?>
+
 <div class="panel-group payment-accordion"
 
      data-generate-redirect-url="<?= $_SERVER["REQUEST_SCHEME"] ?>://<?=$_SERVER["HTTP_HOST"]?>/<?= ltrim( $this->pimcoreUrl(['controller' => "BsPayone",'action'=>'get-payone-redirect-url'],'payone',true),'/')?>"

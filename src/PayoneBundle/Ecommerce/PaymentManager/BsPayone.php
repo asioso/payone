@@ -205,7 +205,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     private $serverService;
 
 
-
     /**
      * BsPayone constructor.
      * @param array $options
@@ -613,7 +612,8 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     public function getInitPaymentRedirectUrl($config)
     {
         /** @var ICart $cart */
-        if (!$cart = $config['cart']) {
+        $cart = $config['cart'];
+        if (!$cart) {
             throw new \Exception('no cart sent');
         }
 
@@ -660,21 +660,22 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         if ($result['status'] == "APPROVED") {
 
 
-            /*
-             //commit the order!
-            if($paymentType== "PREPAYMENT"){
+            if ($paymentType == self::METHOD_INVOICE || $paymentType == self::METHOD_PREPAYMENT) {
+                //commit the order already
                 $checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
                 $checkoutManager->handlePaymentResponseAndCommitOrderPayment($result);
+
+                //change redirect to checkout complete
+                $result['redirecturl'] = $config['completedURL'];
+                $result['status'] = 'REDIRECT';
             }
-            */
 
-
-            $result['redirecturl'] = $config['successURL'];
+            /*
             $redirectURL = $result['redirecturl'];
-            $result['status'] = 'REDIRECT';
             if($paymentType == "PREPAYMENT"){
                 $result['poll'] = $config['pollingURL']."?ref=". $result['reference'];
             }
+            */
 
         }
 
@@ -973,11 +974,11 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             $price = new Price(Decimal::create($authorizedData['price']), new Currency($authorizedData['currency']));
 
-            $this->registry->logTransaction($response['reference'], $response['txid'],$response['txaction'], $response);
+            $this->registry->logTransaction($response['reference'], $response['txid'], $response['txaction'], $response);
 
-            if ($response['reference'] !== null && (($response['txaction'] == 'appointed') )) {
+            if ($response['reference'] !== null && (($response['txaction'] == 'appointed'))) {
                 $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
-            }else if ($response['reference'] !== null && (($response['txaction'] == 'paid'))) {
+            } else if ($response['reference'] !== null && (($response['txaction'] == 'paid'))) {
                 $paymentStatus = StatusInterface::STATUS_CLEARED;
             }
 
@@ -1015,8 +1016,9 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             $this->logger->info('seamless authorized data' . var_export($authorizedData, true));
 
             $this->setAuthorizedData($authorizedData);
-        }
-        else {
+
+
+        } else {
             // failed
             $paymentStatus = AbstractOrder::ORDER_STATE_PAYMENT_PENDING;
             $message = $response['errorDetail'];
@@ -1320,7 +1322,8 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param array $options
      * @return array
      */
-    public function buildCaptureRequest($txid, $amount, $currency, array $options = [] ){
+    public function buildCaptureRequest($txid, $amount, $currency, array $options = [])
+    {
         $parameters = array(
             "request" => "capture",
             "amount" => $amount,
@@ -1329,7 +1332,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         );
         $min = $this->getMinimalDefaultParameters();
 
-        return array_merge($parameters, $min );
+        return array_merge($parameters, $min);
     }
 
 
