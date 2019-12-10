@@ -970,13 +970,22 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
             $this->registry->logTransaction($response['reference'], $response['txid'], $response['txaction'], $response);
 
+
             if ($response['reference'] !== null && (($response['txaction'] == 'appointed'))) {
                 $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
             } else if ($response['reference'] !== null && (($response['txaction'] == 'paid'))) {
                 $paymentStatus = StatusInterface::STATUS_CLEARED;
                 // resolve capture
                 $this->captureQueue->resolveCapture($response['txid']);
-
+            } else if ($response['reference'] !== null && (($response['txaction'] == 'capture'))) {
+                $paymentStatus = StatusInterface::STATUS_CLEARED;
+            } else if ($response['reference'] !== null && (($response['txaction'] == 'cancelation'))) {
+                $paymentStatus = StatusInterface::STATUS_CANCELLED;
+            }  else if ($response['reference'] !== null && (($response['txaction'] == 'reminder'))) {
+                $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
+            } else if ($response['reference'] !== null && (($response['txaction'] == 'invoice'))) {
+                //TODO: is that correct?
+                $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
             }
 
             $status = new Status(
