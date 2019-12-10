@@ -43,7 +43,7 @@ class CaptureHandler implements CaptureQueueInterface
     public function __construct( ServerToServerServiceInterface $serverService)
     {
         $this->serverService = $serverService;
-        $this->payone = Factory::getInstance()->getPaymentManager()->getProvider('bspayone');
+
     }
 
     /**
@@ -80,26 +80,26 @@ class CaptureHandler implements CaptureQueueInterface
      */
     public function resolveCapture($txid)
     {
+
+        $this->payone = Factory::getInstance()->getPaymentManager()->getProvider('bspayone');
         $db = Db::get();
         $result = $db->fetchRow(
             "SELECT * FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN_TXID . "` = ?",
             [$txid]
         );
 
-        if (!$result) {
-            throw new \Exception('reference does not exist');
-        } elseif ($result['processed'] != null) {
-            throw new \Exception('capture already processed');
+
+        if($result && $result['processed'] == null){
+            Lock::acquire(self::LOG_LOCK_KEY);
+            $now = CarbonImmutable::now();
+            //build request and send it! updated processed to current timestamp
+            $params = $this->payone->buildCaptureRequest($txid, $result[self::COLUMN_AMOUNT], $result[self::COLUMN_CURRENCY], json_decode($result[self::COLUMN_DATA], true));
+            $this->serverService->serverToServerRequest($params);
+
+            $db->updateWhere(self::LOG_TABLE_NAME, [self::COLUMN_PROCESSED=> $now ], "id = ". $result['id'] );
+
+            Lock::release(self::LOG_LOCK_KEY);
         }
 
-        Lock::acquire(self::LOG_LOCK_KEY);
-        $now = CarbonImmutable::now();
-        //build request and send it! updated processed to current timestamp
-        $params = $this->payone->buildCaptureRequest($txid, $result[self::COLUMN_AMOUNT], $result[self::COLUMN_CURRENCY], json_decode($result[self::COLUMN_DATA], true));
-        $this->serverService->serverToServerRequest($params);
-
-        $db->updateWhere(self::LOG_TABLE_NAME, [self::COLUMN_PROCESSED=> $now ], "id = ". $result['id'] );
-
-        Lock::release(self::LOG_LOCK_KEY);
     }
 }
