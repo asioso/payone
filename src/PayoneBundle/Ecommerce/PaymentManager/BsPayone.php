@@ -647,9 +647,9 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         $result['reference'] = $orderIdent;
 
         $redirectURL = $result['redirecturl'];
+        if ($result['status'] == "APPROVED") {
+            if ( $paymentType == self::METHOD_PREPAYMENT) {
 
-        if ( $paymentType == self::METHOD_PREPAYMENT) {
-            if ($result['status'] == "APPROVED") {
                 //commit the order already
                 $checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
                 $checkoutManager->handlePaymentResponseAndCommitOrderPayment($result);
@@ -657,6 +657,9 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
                 //change redirect to checkout complete
                 $result['redirecturl'] = $config['completedURL'];
                 $result['status'] = 'REDIRECT';
+                $redirectURL = $result['redirecturl'];
+            } else if($paymentType == self::METHOD_CCARD && empty($result['redirecturl'])){
+                $result['redirecturl'] = $config['successURL'];
                 $redirectURL = $result['redirecturl'];
             }
         }
@@ -667,7 +670,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         }
 
         return $result;
-
 
     }
 
