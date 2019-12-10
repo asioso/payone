@@ -661,6 +661,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             } else if($paymentType == self::METHOD_CCARD && empty($result['redirecturl'])){
                 $result['redirecturl'] = $config['successURL'];
                 $redirectURL = $result['redirecturl'];
+                $result['status'] = 'REDIRECT';
             }
         }
 
