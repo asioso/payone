@@ -42,8 +42,6 @@ use Pimcore\Tool\RestClient\Exception;
 use Pimcore\Version;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Templating\EngineInterface;
@@ -86,20 +84,11 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
     const PAYMENT_RETURN_STATE_PENDING = 'pending';
 
 
-    /**
-     * @var FormFactoryInterface
-     */
-    private $formFactory;
 
     /**
      * @var EngineInterface
      */
     private $templatingEngine;
-
-    /**
-     * @var SessionInterface
-     */
-    private $session;
 
 
     /**
@@ -216,11 +205,10 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @param EngineInterface $templatingEngine
      * @param LoggerInterface $logger
      * @param IRegistry $registry
-     * @param CaptureQueueInterface $captureQueue
      * @param ServerToServerServiceInterface $serverService
      * @throws \Exception
      */
-    public function __construct(array $options, EngineInterface $templatingEngine, LoggerInterface $logger, IRegistry $registry, CaptureQueueInterface $captureQueue, ServerToServerServiceInterface $serverService)
+    public function __construct(array $options, EngineInterface $templatingEngine, LoggerInterface $logger, IRegistry $registry, ServerToServerServiceInterface $serverService)
     {
 
         $this->processOptions(
@@ -232,7 +220,6 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         $this->logger = $logger;
         $this->registry = $registry;
         $this->serverService = $serverService;
-        $this->captureQueue = $captureQueue;
     }
 
     /**
@@ -976,7 +963,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             } else if ($response['reference'] !== null && (($response['txaction'] == 'paid'))) {
                 $paymentStatus = StatusInterface::STATUS_CLEARED;
                 // resolve capture
-                $this->captureQueue->resolveCapture($response['txid']);
+                //$this->captureQueue->resolveCapture($response['txid']);
             } else if ($response['reference'] !== null && (($response['txaction'] == 'capture'))) {
                 $paymentStatus = StatusInterface::STATUS_CLEARED;
             } else if ($response['reference'] !== null && (($response['txaction'] == 'cancelation'))) {
