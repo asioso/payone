@@ -14,6 +14,7 @@ namespace PayoneBundle\Ecommerce\PaymentManager;
 use GuzzleHttp\Exception\GuzzleException;
 use PayoneBundle\Model\AbstractDataProcessor;
 use PayoneBundle\PayoneBundle;
+use PayoneBundle\Registry\CaptureQueueInterface;
 use PayoneBundle\Registry\IRegistry;
 use PayoneBundle\Registry\Registry;
 use PayoneBundle\Service\ServerToServerServiceInterface;
@@ -203,33 +204,35 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
      * @var ServerToServerServiceInterface
      */
     private $serverService;
+    /**
+     * @var CaptureQueueInterface
+     */
+    private $captureQueue;
 
 
     /**
      * BsPayone constructor.
      * @param array $options
      * @param EngineInterface $templatingEngine
-     * @param SessionInterface $session
-     * @param FormFactoryInterface $formFactory
      * @param LoggerInterface $logger
      * @param IRegistry $registry
+     * @param CaptureQueueInterface $captureQueue
      * @param ServerToServerServiceInterface $serverService
      * @throws \Exception
      */
-    public function __construct(array $options, EngineInterface $templatingEngine, SessionInterface $session, FormFactoryInterface $formFactory, LoggerInterface $logger, IRegistry $registry, ServerToServerServiceInterface $serverService)
+    public function __construct(array $options, EngineInterface $templatingEngine, LoggerInterface $logger, IRegistry $registry, CaptureQueueInterface $captureQueue, ServerToServerServiceInterface $serverService)
     {
-        $this->formFactory = $formFactory;
 
         $this->processOptions(
             $this->configureOptions(new OptionsResolver())->resolve($options)
         );
         $this->templatingEngine = $templatingEngine;
-        $this->session = $session;
         $this->mode = getenv('PAYONE_MODE');
 
         $this->logger = $logger;
         $this->registry = $registry;
         $this->serverService = $serverService;
+        $this->captureQueue = $captureQueue;
     }
 
     /**
@@ -657,10 +660,8 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
         $redirectURL = $result['redirecturl'];
 
-        if ($result['status'] == "APPROVED") {
-
-
-            if ($paymentType == self::METHOD_INVOICE || $paymentType == self::METHOD_PREPAYMENT) {
+        if ( $paymentType == self::METHOD_PREPAYMENT) {
+            if ($result['status'] == "APPROVED") {
                 //commit the order already
                 $checkoutManager = Factory::getInstance()->getCheckoutManager($cart);
                 $checkoutManager->handlePaymentResponseAndCommitOrderPayment($result);
@@ -668,15 +669,8 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
                 //change redirect to checkout complete
                 $result['redirecturl'] = $config['completedURL'];
                 $result['status'] = 'REDIRECT';
+                $redirectURL = $result['redirecturl'];
             }
-
-            /*
-            $redirectURL = $result['redirecturl'];
-            if($paymentType == "PREPAYMENT"){
-                $result['poll'] = $config['pollingURL']."?ref=". $result['reference'];
-            }
-            */
-
         }
 
         if (!$redirectURL) {
@@ -980,6 +974,9 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
                 $paymentStatus = StatusInterface::STATUS_AUTHORIZED;
             } else if ($response['reference'] !== null && (($response['txaction'] == 'paid'))) {
                 $paymentStatus = StatusInterface::STATUS_CLEARED;
+                // resolve capture
+                $this->captureQueue->resolveCapture($response['txid']);
+
             }
 
             $status = new Status(

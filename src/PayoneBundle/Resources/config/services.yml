@@ -24,8 +24,6 @@ services:
     arguments:
       $options: []
       $templatingEngine: '@templating.engine.delegating'
-      $session: '@session'
-      $formFactory: '@form.factory'
       $serverService: '@PayoneBundle\Service\ServerToServerServiceInterface'
 
 
