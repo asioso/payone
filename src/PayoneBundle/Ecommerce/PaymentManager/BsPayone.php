@@ -215,7 +215,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
             $this->configureOptions(new OptionsResolver())->resolve($options)
         );
         $this->templatingEngine = $templatingEngine;
-        $this->mode = getenv('PAYONE_MODE');
+        //$this->mode = getenv('PAYONE_MODE');
 
         $this->logger = $logger;
         $this->registry = $registry;
@@ -486,7 +486,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
 
         $params['payoneFrontendScript'] = $this->js;
         $params['javascriptUrl'] = $this->js;
-
+        $params['mode'] = $this->mode;
 
         $orderIdent = $config['orderIdent'];
 
