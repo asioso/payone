@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `bundle_payone_transaction_log` (
   `method` VARCHAR(32) COLLATE utf8_bin,
   `payone_reference` VARCHAR(24) COLLATE utf8_bin DEFAULT '',
   `txid` VARCHAR(32) COLLATE utf8_bin,
+  `language` VARCHAR(8) COLLATE utf8_bin,
   `data` TEXT COLLATE utf8_bin,
    PRIMARY KEY (`id`)
   )

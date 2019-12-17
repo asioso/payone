@@ -37,8 +37,9 @@ interface IRegistry
      * @param $txId
      * @param $type
      * @param $data
+     * @param null $language
      */
-    public  function logTransaction($reference, $txId, $type ,$data);
+    public  function logTransaction($reference, $txId, $type ,$data, $language = null);
 
 
     /**
@@ -66,4 +67,10 @@ interface IRegistry
      * @return bool
      */
     public function findTransactionAppointedForPayoneReference($payoneReference);
+
+    /**
+     * @param $payoneReference
+     * @return string
+     */
+    public static function findTransactionLanguageForPayoneReference($payoneReference);
 }

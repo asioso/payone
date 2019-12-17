@@ -65,7 +65,7 @@ $state = $this->getParam('state');
        target="_top"><?= $this->translate('payment.retry',[], 'PayoneBundle') ?></a>
 
     <script type="text/javascript">
-        window.open("<?= $_SERVER["REQUEST_SCHEME"] ?>://<?=$_SERVER['HTTP_HOST']?><?= $this->pimcoreUrl(['action' => 'payment', 'controller' => 'payment', 'prefix'=>$this->language], 'action', true) ?>", '_top');
+        window.open("<?= $_SERVER["REQUEST_SCHEME"] ?>://<?=$_SERVER['HTTP_HOST']?><?= $this->pimcoreUrl(['action' => 'payment', 'controller' => 'payment', 'prefix'=>$this->language, 'error'=> true ], 'action', true) ?>", '_top');
     </script>>
 
 <?php } elseif ($state == \PayoneBundle\Ecommerce\PaymentManager\BsPayone::PAYMENT_RETURN_STATE_PENDING) { ?>

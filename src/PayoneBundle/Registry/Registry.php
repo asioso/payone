@@ -37,6 +37,8 @@ class Registry implements IRegistry
     const COLUMN_TIMESTAMP = "timestamp";
     const COLUMN_TXID = "txid";
     const COLUMN_METHOD = "method";
+    const COLUMN_LANGUAGE = "language";
+
 
     const LOG_LOCK_KEY = 'payony_transaction_log';
 
@@ -100,8 +102,9 @@ class Registry implements IRegistry
      * @param $txId
      * @param $type
      * @param $data
+     * @param null $language
      */
-    public function logTransaction($reference, $txId, $type, $data)
+    public function logTransaction($reference, $txId, $type, $data, $language = null)
     {
         Lock::acquire(self::LOG_LOCK_KEY);
 
@@ -115,6 +118,7 @@ class Registry implements IRegistry
             self::COLUMN__PAYONE_REFERENCE => $reference,
             self::COLUMN_TXID => $txId,
             self::COLUMN_DATA => json_encode($data),
+            self::COLUMN_LANGUAGE => $language
         ]);
 
         Lock::release(self::LOG_LOCK_KEY);
@@ -206,4 +210,21 @@ class Registry implements IRegistry
     }
 
 
+    /**
+     * @inheritDoc
+     */
+    public static function findTransactionLanguageForPayoneReference($payoneReference)
+    {
+        $db = Db::get();
+        $result = $db->fetchRow(
+            "SELECT `". self::COLUMN_LANGUAGE. "` FROM " . self::LOG_TABLE_NAME . " WHERE `" . self::COLUMN__PAYONE_REFERENCE . "` = ?",
+            [$payoneReference]
+        );
+
+        if($result){
+            return $result[self::COLUMN_LANGUAGE];
+        }
+
+        return null;
+    }
 }
