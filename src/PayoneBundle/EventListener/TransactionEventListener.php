@@ -65,7 +65,9 @@ class TransactionEventListener implements EventSubscriberInterface
             $event->getRequestParameters()['reference'],
             $event->getResponseParameters()['txid'],
             $event->getRequestParameters()['request'],
-            array_merge($event->getResponseParameters(), ['_method' => $event->getRequestParameters()['_method']])
+            array_merge($event->getResponseParameters(), ['_method' => $event->getRequestParameters()['_method']]),
+            $event->getRequestParameters()['language']
+
         );
 
     }
