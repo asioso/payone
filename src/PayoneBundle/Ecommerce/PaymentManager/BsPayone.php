@@ -869,7 +869,7 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
                     "amount" => $this->getAmount($price),
                     'currency' => $price->getCurrency()->getShortName(),
                     "reference" => $orderIdent,
-                    "narrative_text" => $config['orderDescription'] ?: $config['paymentInfo']->getInternalPaymentId(),
+                    "narrative_text" => $this->cleanNarrativeText( $config['orderDescription'] ?: $config['paymentInfo']->getInternalPaymentId()),
                     "successurl" => $config['successURL'],
                     "errorurl" => $config['failureURL'],
                     "backurl" => $config['cancelURL'],
@@ -1357,5 +1357,12 @@ class BsPayone extends AbstractPayment implements \Pimcore\Bundle\EcommerceFrame
         $snippet = $this->initPayment($price, $config->asArray());
 
         return new SnippetResponse($orderAgent->getOrder(), $snippet);
+    }
+
+    private function cleanNarrativeText(string $param)
+    {
+        //some chars like "_" seem to cause issues with SOFORT/KLARNA
+        $param = str_replace('_', '-', $param);
+        return $param;
     }
 }
